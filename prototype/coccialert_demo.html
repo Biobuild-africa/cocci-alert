@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CocciAlert — Controlled Prototype Mock</title>
+<style>
+  :root {
+    --bg: #f4f1ea;
+    --ink: #1c1c1c;
+    --muted: #6b6b6b;
+    --green: #2d6a4f;
+    --amber: #c08200;
+    --red: #9d2b2b;
+    --neutral: #4a5568;
+    --line: #d4cfc4;
+    --paper: #ffffff;
+    --ussd: #1a1a1a;
+    --ussd-green: #6ec173;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 40px 20px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.5;
+  }
+  h1 {
+    font-weight: 600; font-size: 26px; margin: 0 0 4px 0;
+  }
+  .lede {
+    color: var(--muted); margin-bottom: 36px;
+    max-width: 720px; font-size: 15px;
+  }
+  .stage {
+    display: grid; gap: 32px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    max-width: 1100px;
+  }
+  .channel {
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: 18px; padding: 22px;
+  }
+  .channel h2 {
+    font-size: 14px; text-transform: uppercase;
+    letter-spacing: 0.08em; margin: 0 0 14px 0;
+    color: var(--muted); font-weight: 600;
+  }
+  .channel .device-label {
+    font-size: 13px; color: var(--muted); margin-bottom: 14px;
+  }
+
+  /* Feature-phone USSD frame */
+  .ussd-phone {
+    background: var(--ussd); border-radius: 22px;
+    padding: 18px 16px; font-family: "Courier New", monospace;
+    color: var(--ussd-green); font-size: 13px;
+    min-height: 380px;
+    box-shadow: inset 0 0 0 2px #333;
+  }
+  .ussd-screen {
+    background: #0a1f0a; padding: 12px;
+    border-radius: 4px; min-height: 320px;
+    white-space: pre-wrap; line-height: 1.4;
+  }
+  .ussd-prompt { color: #8fd494; }
+
+  /* WhatsApp frame */
+  .wa-phone {
+    background: #075e54; border-radius: 22px; padding: 8px;
+    min-height: 380px;
+  }
+  .wa-header {
+    color: white; padding: 10px 12px; font-size: 13px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .wa-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: #25d366; display: flex; align-items: center;
+    justify-content: center; color: #075e54; font-weight: 700;
+    font-size: 12px;
+  }
+  .wa-body {
+    background: #e5ddd5; padding: 12px; border-radius: 4px;
+    min-height: 320px; display: flex; flex-direction: column; gap: 8px;
+    background-image: linear-gradient(rgba(229, 221, 213, 0.92), rgba(229, 221, 213, 0.92));
+  }
+  .wa-msg {
+    max-width: 80%; padding: 8px 10px; border-radius: 8px;
+    font-size: 13px; line-height: 1.4;
+  }
+  .wa-bot {
+    background: white; align-self: flex-start;
+    border-radius: 0 8px 8px 8px;
+  }
+  .wa-user {
+    background: #dcf8c6; align-self: flex-end;
+    border-radius: 8px 0 8px 8px;
+  }
+  .wa-buttons {
+    display: flex; gap: 6px; flex-wrap: wrap;
+    background: white; padding: 8px; border-radius: 8px;
+    align-self: flex-start; max-width: 90%;
+  }
+  .wa-button {
+    background: #f0f0f0; padding: 4px 10px; border-radius: 12px;
+    font-size: 12px; color: #075e54; font-weight: 600;
+  }
+
+  /* Triage result card */
+  .triage {
+    margin-top: 24px; padding: 14px 16px;
+    border-radius: 10px; border-left: 4px solid;
+  }
+  .triage.emergency { background: #fdf0f0; border-color: var(--red); color: var(--red); }
+  .triage.act      { background: #fff8eb; border-color: var(--amber); color: var(--amber); }
+  .triage.monitor  { background: #eef6f1; border-color: var(--green); color: var(--green); }
+  .triage strong { display: block; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+  .triage p { margin: 0; font-size: 13px; color: #333; }
+
+  /* Bottom flow diagram */
+  .flow {
+    margin: 48px auto 0; max-width: 1100px;
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: 18px; padding: 28px;
+  }
+  .flow h2 { margin: 0 0 8px 0; font-size: 18px; font-weight: 600; }
+  .flow p.sub { color: var(--muted); margin: 0 0 20px 0; font-size: 14px; }
+  .pipeline {
+    display: grid; gap: 12px;
+    grid-template-columns: repeat(5, 1fr);
+  }
+  .pipeline-step {
+    background: #f7f4ec; border: 1px solid var(--line); border-radius: 10px;
+    padding: 12px; text-align: center; position: relative;
+  }
+  .pipeline-step .num {
+    width: 22px; height: 22px; border-radius: 50%; background: var(--neutral);
+    color: white; font-size: 11px; font-weight: 700;
+    margin: 0 auto 8px; display: flex; align-items: center; justify-content: center;
+  }
+  .pipeline-step h3 { font-size: 13px; margin: 0 0 4px 0; font-weight: 600; }
+  .pipeline-step p { font-size: 11px; color: var(--muted); margin: 0; line-height: 1.35; }
+  .pipeline-arrow {
+    position: absolute; right: -10px; top: 50%;
+    transform: translateY(-50%); color: #b0a895;
+    font-size: 16px; font-weight: 700; z-index: 1;
+  }
+  .pipeline-step:last-child .pipeline-arrow { display: none; }
+
+  .footer-note {
+    max-width: 1100px; margin: 24px auto 0;
+    font-size: 12px; color: var(--muted); line-height: 1.5;
+  }
+
+  @media (max-width: 700px) {
+    .pipeline { grid-template-columns: 1fr; }
+    .pipeline-arrow { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<h1>CocciAlert — Controlled Prototype Demonstration</h1>
+<p class="lede">
+  This mock shows the farmer-facing flow on both the feature-phone (USSD) and smartphone (WhatsApp)
+  channels, alongside the privacy-protected data pipeline. The scenario below is a real
+  test case from the validation set (Scenario A7 — Loose droppings, &lt;3 wk chicks, unvaccinated, leaking drinkers).
+</p>
+
+<div class="stage">
+
+  <!-- USSD CHANNEL -->
+  <div class="channel">
+    <h2>Channel A · USSD</h2>
+    <p class="device-label">Feature phone via *347*CCA# shortcode · Yorùbá · No data plan needed</p>
+    <div class="ussd-phone">
+      <div class="ussd-screen">CocciAlert — Iranlọwọ Adie<br>
+═════════════════<br><br>
+<span class="ussd-prompt">Sho ẹjẹ tutu wà ninu igbẹ?</span><br>
+  1. Bẹẹni<br>
+  2. Rara &lt;<br><br>
+<span class="ussd-prompt">Bawo ni igbẹ ẹlẹdẹ wà?</span><br>
+  1. Deede<br>
+  2. Yẹrẹyẹrẹ &lt;<br>
+  3. Igbẹ̀ run<br><br>
+<span class="ussd-prompt">Ọjọ ori adiẹ?</span><br>
+  1. Kere si ọsẹ 3 &lt;<br>
+  2. Ọsẹ 3-8<br>
+  3. Ju ọsẹ 8 lọ<br><br>
+... 11 ibeere si lo<br><br>
+<span class="ussd-prompt">[Send/Reply]</span>
+      </div>
+    </div>
+    <div class="triage act">
+      <strong>Result · Act now</strong>
+      <p>Yọ ìkórè tútù kúrò lẹ́sẹ̀kẹ́sẹ̀. Pe Dokita Ẹranko tabi
+      Olùtàjà ti a fọwọ́ sí. Má ṣe lo òògùn lórí ara rẹ.</p>
+    </div>
+  </div>
+
+  <!-- WhatsApp CHANNEL -->
+  <div class="channel">
+    <h2>Channel B · WhatsApp</h2>
+    <p class="device-label">Smartphone · English · WhatsApp Business API via Twilio/Turn.io</p>
+    <div class="wa-phone">
+      <div class="wa-header">
+        <div class="wa-avatar">C</div>
+        <div>CocciAlert · BioBuild Africa</div>
+      </div>
+      <div class="wa-body">
+        <div class="wa-msg wa-bot">
+          Hello 👋 I can help you check your flock today. First, do you consent to share anonymous
+          flock-health data with the FCI4Africa programme? <br><em>Your phone number is never stored.</em>
+        </div>
+        <div class="wa-msg wa-user">Yes, I agree</div>
+        <div class="wa-msg wa-bot">Thanks. Let's check. Any fresh <strong>blood</strong> in droppings today?</div>
+        <div class="wa-buttons">
+          <span class="wa-button">No</span><span class="wa-button">Yes</span>
+        </div>
+        <div class="wa-msg wa-user">No</div>
+        <div class="wa-msg wa-bot">Good. What is the predominant <strong>consistency</strong> of the droppings?</div>
+        <div class="wa-buttons">
+          <span class="wa-button">Normal</span><span class="wa-button">Loose ✓</span><span class="wa-button">Severe diarrhea</span>
+        </div>
+        <div class="wa-msg wa-user">Loose</div>
+        <div class="wa-msg wa-bot">... 12 more questions ...</div>
+      </div>
+    </div>
+    <div class="triage act">
+      <strong>Result · Act now</strong>
+      <p>Remove wet litter immediately, isolate severely affected birds, and contact a veterinary officer
+      or approved agro-vet. <em>Do not self-prescribe drugs.</em></p>
+    </div>
+  </div>
+
+</div>
+
+<!-- BACKEND PIPELINE -->
+<div class="flow">
+  <h2>What happens behind the scenes</h2>
+  <p class="sub">Every interaction follows the same five-step controlled pipeline. The farmer never knows about
+  steps 3-5 — they just receive their triage advice.</p>
+
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="num">1</div>
+      <h3>Farmer input</h3>
+      <p>14 bounded questions answered via USSD menu or WhatsApp buttons. No free-text PII captured.</p>
+      <div class="pipeline-arrow">▸</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="num">2</div>
+      <h3>Rule engine</h3>
+      <p>Deterministic Python engine; Emmanuel's 12-sign decision tree; no ML in the clinical path.</p>
+      <div class="pipeline-arrow">▸</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="num">3</div>
+      <h3>Triage result</h3>
+      <p>Emergency / Act now / Keep monitoring + paraphrased action message in farmer's language.</p>
+      <div class="pipeline-arrow">▸</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="num">4</div>
+      <h3>Anonymized log</h3>
+      <p>Phone number hashed with rotating salt. Geographic resolution capped at LGA. Consent flag persisted.</p>
+      <div class="pipeline-arrow">▸</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="num">5</div>
+      <h3>FCI4Africa data layer</h3>
+      <p>Aggregated LGA-month rollups pushed to Food Systems Dashboard. Only consenting records included.</p>
+    </div>
+  </div>
+</div>
+
+<p class="footer-note">
+  This is a controlled prototype demonstration produced as TRL 4 evidence for the FCI4Africa OC1 proposal.
+  It uses synthetic data. No real farmer data has been collected. Live USSD/WhatsApp deployment is a
+  Phase 2 deliverable. BioBuild Africa Ltd · RC 9604822.
+</p>
+
+</body>
+</html>

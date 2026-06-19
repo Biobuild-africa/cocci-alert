@@ -1,0 +1,30 @@
+field_name,data_type,required,privacy_class,description,example_value
+event_id,UUID,yes,neutral,Unique identifier for this single triage event,7d8f3c2a-1b4e-49d6-a7f1-2c8e9b0d3f12
+session_id,UUID,yes,neutral,Groups all events from one farmer interaction session,b8e2f1a0-3c4d-5e6f-7a8b-9c0d1e2f3a4b
+timestamp_utc,ISO8601,yes,neutral,UTC timestamp of triage decision,2026-06-18T14:32:00Z
+anonymized_user_id,UUID,yes,sensitive,Cryptographically-hashed farmer identifier; NOT reversible to phone/name,9a8c7b6d-5e4f-3a2b-1c0d-8e7f6a5b4c3d
+consent_data_sharing,boolean,yes,neutral,Explicit consent for anonymized event to enter FCI4Africa dataset,true
+consent_method,enum,yes,neutral,How consent was captured,ussd_opt_in
+consent_timestamp_utc,ISO8601,yes,neutral,When consent was granted in this session,2026-06-18T14:30:12Z
+state_code,ISO3166-2-NG,yes,aggregated,Nigerian state — admin level 1 only,NG-OY
+lga_code,NG-LGA-ID,yes,aggregated,Local Government Area — admin level 2 minimum granularity,NG-OY-IBN
+channel,enum,yes,neutral,Interaction channel,ussd
+language,BCP47,yes,neutral,Language of interaction,yo
+flock_size_band,enum,yes,aggregated,"Size class: tiny (<50), small (50-200), medium (201-500), large (>500)",small
+bird_type,enum,yes,aggregated,"layer, broiler, dual_purpose, cockerel, indigenous",layer
+bird_age_band,enum,yes,aggregated,"under_3wk, 3_to_8wk, over_8wk",3_to_8wk
+vaccination_coccidiosis,enum,yes,aggregated,"yes, no, unknown",no
+on_coccidiostat_program,boolean,yes,aggregated,Dietary coccidiostat use reported,false
+droppings_consistency,enum,yes,aggregated,"normal, loose, severe_diarrhea",loose
+emergency_signs_present,csv_subset,yes,aggregated,"Pipe-separated list of any emergency signs detected; empty if none",fresh_blood|sudden_spike
+supporting_signs_count,int,yes,aggregated,Count of supporting signs positive in this event,4
+supporting_signs_codes,csv_subset,yes,aggregated,Pipe-separated codes for which supporting signs were positive,hunched_wide|huddling|paleness|damp_litter
+litter_condition,enum,yes,aggregated,"dry, damp, heavily_caked_wet",damp
+mortality_trend,enum,yes,aggregated,"none, gradual, sudden_spike",gradual
+triage_outcome,enum,yes,neutral,Final triage class,act_now
+triage_rationale_code,enum,yes,neutral,Which rule fired (audit trail),loose_plus_2_signs
+referral_made,boolean,yes,neutral,Whether the farmer was advised to contact veterinary support,true
+engine_version,semver,yes,neutral,Version of the rule engine that produced this result,0.1.0
+schema_version,semver,yes,neutral,Version of this schema,0.1.0
+loose_double_count_param,boolean,yes,neutral,Parameter setting at time of triage (for reproducibility),false
+age_vacc_hard_gate_param,boolean,yes,neutral,Parameter setting at time of triage (for reproducibility),false
