@@ -1,7 +1,7 @@
 """
 CocciAlert — Synthetic Scenario Validation Pack
 
-Generates 32 synthetic flock observations spanning the decision space,
+Generates 31 synthetic flock observations spanning the decision space,
 runs the rule engine, and produces a clinical-review-ready report
 for Emmanuel's sign-off.
 
@@ -221,7 +221,7 @@ SCENARIOS = [
 def run_validation():
     print("=" * 78)
     print("CocciAlert Rule Engine — Synthetic Scenario Validation")
-    print("32 scenarios spanning the decision space")
+    print("31 scenarios spanning the decision space")
     print("=" * 78)
 
     results = []

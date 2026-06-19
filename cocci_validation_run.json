@@ -1,0 +1,441 @@
+{
+  "total_scenarios": 31,
+  "matches": 31,
+  "outcome_distribution": {
+    "Emergency": 9,
+    "Act now": 14,
+    "Keep monitoring, no coccidiosis": 8
+  },
+  "results": [
+    {
+      "scenario_id": "E1",
+      "narrative": "Fresh blood visible in droppings, otherwise healthy-looking flock",
+      "expected": "Emergency",
+      "actual": "Emergency",
+      "match": true,
+      "supporting_signs_count": 0,
+      "supporting_signs": [],
+      "triggers": [
+        "Fresh blood visible in droppings"
+      ],
+      "rationale": "One or more emergency triggers matched."
+    },
+    {
+      "scenario_id": "E2",
+      "narrative": "Orange mucus / sloughed intestinal tissue observed",
+      "expected": "Emergency",
+      "actual": "Emergency",
+      "match": true,
+      "supporting_signs_count": 0,
+      "supporting_signs": [],
+      "triggers": [
+        "Orange mucus or sloughed intestinal tissue"
+      ],
+      "rationale": "One or more emergency triggers matched."
+    },
+    {
+      "scenario_id": "E3",
+      "narrative": "Sudden mortality spike with no other major signs",
+      "expected": "Emergency",
+      "actual": "Emergency",
+      "match": true,
+      "supporting_signs_count": 0,
+      "supporting_signs": [],
+      "triggers": [
+        "Sudden mortality spike"
+      ],
+      "rationale": "One or more emergency triggers matched."
+    },
+    {
+      "scenario_id": "E4",
+      "narrative": "Severe diarrhea + widespread hunched posture",
+      "expected": "Emergency",
+      "actual": "Emergency",
+      "match": true,
+      "supporting_signs_count": 1,
+      "supporting_signs": [
+        "Birds hunched with ruffled feathers (widespread)"
+      ],
+      "triggers": [
+        "Severe diarrhea WITH widespread hunched posture / ruffled feathers"
+      ],
+      "rationale": "One or more emergency triggers matched."
+    },
+    {
+      "scenario_id": "E5",
+      "narrative": "Severe diarrhea + significant feed drop",
+      "expected": "Emergency",
+      "actual": "Emergency",
+      "match": true,
+      "supporting_signs_count": 1,
+      "supporting_signs": [
+        "Feed intake below expected growth curve"
+      ],
+      "triggers": [
+        "Severe diarrhea WITH significant drop in feed intake"
+      ],
+      "rationale": "One or more emergency triggers matched."
+    },
+    {
+      "scenario_id": "E6",
+      "narrative": "Severe diarrhea + paleness",
+      "expected": "Emergency",
+      "actual": "Emergency",
+      "match": true,
+      "supporting_signs_count": 1,
+      "supporting_signs": [
+        "Noticeable paleness or depigmentation"
+      ],
+      "triggers": [
+        "Severe diarrhea WITH noticeable paleness"
+      ],
+      "rationale": "One or more emergency triggers matched."
+    },
+    {
+      "scenario_id": "E7",
+      "narrative": "Severe diarrhea + widespread huddling",
+      "expected": "Emergency",
+      "actual": "Emergency",
+      "match": true,
+      "supporting_signs_count": 1,
+      "supporting_signs": [
+        "Birds huddling despite adequate ambient temperature"
+      ],
+      "triggers": [
+        "Severe diarrhea WITH widespread huddling"
+      ],
+      "rationale": "One or more emergency triggers matched."
+    },
+    {
+      "scenario_id": "E8",
+      "narrative": "Severe diarrhea + significant water drop",
+      "expected": "Emergency",
+      "actual": "Emergency",
+      "match": true,
+      "supporting_signs_count": 1,
+      "supporting_signs": [
+        "Water consumption dropped below normal"
+      ],
+      "triggers": [
+        "Severe diarrhea WITH significant drop in water consumption"
+      ],
+      "rationale": "One or more emergency triggers matched."
+    },
+    {
+      "scenario_id": "E9",
+      "narrative": "Multiple emergency signs (blood + spike + severe diarrhea)",
+      "expected": "Emergency",
+      "actual": "Emergency",
+      "match": true,
+      "supporting_signs_count": 1,
+      "supporting_signs": [
+        "Noticeable paleness or depigmentation"
+      ],
+      "triggers": [
+        "Fresh blood visible in droppings",
+        "Sudden mortality spike",
+        "Severe diarrhea WITH noticeable paleness"
+      ],
+      "rationale": "One or more emergency triggers matched."
+    },
+    {
+      "scenario_id": "A1",
+      "narrative": "Severe diarrhea + leaking drinkers (no emergency systemic signs)",
+      "expected": "Act now",
+      "actual": "Act now",
+      "match": true,
+      "supporting_signs_count": 1,
+      "supporting_signs": [
+        "Misaligned / leaking drinkers creating wet spots"
+      ],
+      "triggers": [],
+      "rationale": "Rule matched: Severe diarrhea + \u22651 supporting sign (1 signs present, threshold 1)."
+    },
+    {
+      "scenario_id": "A2",
+      "narrative": "Severe diarrhea + damp litter only",
+      "expected": "Act now",
+      "actual": "Act now",
+      "match": true,
+      "supporting_signs_count": 1,
+      "supporting_signs": [
+        "Litter damp or heavily caked and wet"
+      ],
+      "triggers": [],
+      "rationale": "Rule matched: Severe diarrhea + \u22651 supporting sign (1 signs present, threshold 1)."
+    },
+    {
+      "scenario_id": "A3",
+      "narrative": "Severe diarrhea + slight (not significant) feed drop",
+      "expected": "Act now",
+      "actual": "Act now",
+      "match": true,
+      "supporting_signs_count": 1,
+      "supporting_signs": [
+        "Feed intake below expected growth curve"
+      ],
+      "triggers": [],
+      "rationale": "Rule matched: Severe diarrhea + \u22651 supporting sign (1 signs present, threshold 1)."
+    },
+    {
+      "scenario_id": "A4",
+      "narrative": "Loose droppings + damp litter + leaking drinkers",
+      "expected": "Act now",
+      "actual": "Act now",
+      "match": true,
+      "supporting_signs_count": 2,
+      "supporting_signs": [
+        "Litter damp or heavily caked and wet",
+        "Misaligned / leaking drinkers creating wet spots"
+      ],
+      "triggers": [],
+      "rationale": "Rule matched: Loose droppings + \u22652 supporting signs (2 signs present, threshold 2)."
+    },
+    {
+      "scenario_id": "A5",
+      "narrative": "Loose droppings + gradual mortality + feed drop",
+      "expected": "Act now",
+      "actual": "Act now",
+      "match": true,
+      "supporting_signs_count": 2,
+      "supporting_signs": [
+        "Feed intake below expected growth curve",
+        "Daily mortality gradually rising above baseline"
+      ],
+      "triggers": [],
+      "rationale": "Rule matched: Loose droppings + \u22652 supporting signs (2 signs present, threshold 2)."
+    },
+    {
+      "scenario_id": "A6",
+      "narrative": "Loose droppings + widespread hunched + huddling",
+      "expected": "Act now",
+      "actual": "Act now",
+      "match": true,
+      "supporting_signs_count": 2,
+      "supporting_signs": [
+        "Birds hunched with ruffled feathers (widespread)",
+        "Birds huddling despite adequate ambient temperature"
+      ],
+      "triggers": [],
+      "rationale": "Rule matched: Loose droppings + \u22652 supporting signs (2 signs present, threshold 2)."
+    },
+    {
+      "scenario_id": "A7",
+      "narrative": "Loose droppings + young chicks unvaccinated (immune-naive risk)",
+      "expected": "Act now",
+      "actual": "Act now",
+      "match": true,
+      "supporting_signs_count": 2,
+      "supporting_signs": [
+        "Flock is < 3 weeks old (immune naivety)",
+        "Coccidiosis vaccination absent / unknown"
+      ],
+      "triggers": [],
+      "rationale": "Rule matched: Loose droppings + \u22652 supporting signs (2 signs present, threshold 2)."
+    },
+    {
+      "scenario_id": "A8",
+      "narrative": "Normal droppings + 3 wet-environment signs",
+      "expected": "Act now",
+      "actual": "Act now",
+      "match": true,
+      "supporting_signs_count": 3,
+      "supporting_signs": [
+        "Flock is < 3 weeks old (immune naivety)",
+        "Litter damp or heavily caked and wet",
+        "Misaligned / leaking drinkers creating wet spots"
+      ],
+      "triggers": [],
+      "rationale": "Rule matched: Normal droppings + \u22653 supporting signs (3 signs present, threshold 3)."
+    },
+    {
+      "scenario_id": "A9",
+      "narrative": "Normal droppings + 3 management gaps",
+      "expected": "Act now",
+      "actual": "Act now",
+      "match": true,
+      "supporting_signs_count": 3,
+      "supporting_signs": [
+        "Coccidiosis vaccination absent / unknown",
+        "Not on dietary coccidiostat program",
+        "Litter damp or heavily caked and wet"
+      ],
+      "triggers": [],
+      "rationale": "Rule matched: Normal droppings + \u22653 supporting signs (3 signs present, threshold 3)."
+    },
+    {
+      "scenario_id": "A10",
+      "narrative": "Normal droppings + 4 signs incl. gradual mortality",
+      "expected": "Act now",
+      "actual": "Act now",
+      "match": true,
+      "supporting_signs_count": 4,
+      "supporting_signs": [
+        "Flock is < 3 weeks old (immune naivety)",
+        "Not on dietary coccidiostat program",
+        "Daily mortality gradually rising above baseline",
+        "Litter damp or heavily caked and wet"
+      ],
+      "triggers": [],
+      "rationale": "Rule matched: Normal droppings + \u22653 supporting signs (4 signs present, threshold 3)."
+    },
+    {
+      "scenario_id": "K1",
+      "narrative": "Completely healthy flock",
+      "expected": "Keep monitoring, no coccidiosis",
+      "actual": "Keep monitoring, no coccidiosis",
+      "match": true,
+      "supporting_signs_count": 0,
+      "supporting_signs": [],
+      "triggers": [],
+      "rationale": "Below Act-now threshold: 0 supporting signs vs threshold 3 (Normal droppings pathway)."
+    },
+    {
+      "scenario_id": "K2",
+      "narrative": "Loose droppings + only 1 supporting sign (below threshold of 2)",
+      "expected": "Keep monitoring, no coccidiosis",
+      "actual": "Keep monitoring, no coccidiosis",
+      "match": true,
+      "supporting_signs_count": 1,
+      "supporting_signs": [
+        "Litter damp or heavily caked and wet"
+      ],
+      "triggers": [],
+      "rationale": "Below Act-now threshold: 1 supporting signs vs threshold 2 (Loose droppings pathway)."
+    },
+    {
+      "scenario_id": "K3",
+      "narrative": "Normal droppings + 2 supporting signs (below threshold of 3)",
+      "expected": "Keep monitoring, no coccidiosis",
+      "actual": "Keep monitoring, no coccidiosis",
+      "match": true,
+      "supporting_signs_count": 2,
+      "supporting_signs": [
+        "Not on dietary coccidiostat program",
+        "Litter damp or heavily caked and wet"
+      ],
+      "triggers": [],
+      "rationale": "Below Act-now threshold: 2 supporting signs vs threshold 3 (Normal droppings pathway)."
+    },
+    {
+      "scenario_id": "K4",
+      "narrative": "Isolated hunched posture only (doesn't count as widespread sign)",
+      "expected": "Keep monitoring, no coccidiosis",
+      "actual": "Keep monitoring, no coccidiosis",
+      "match": true,
+      "supporting_signs_count": 0,
+      "supporting_signs": [],
+      "triggers": [],
+      "rationale": "Below Act-now threshold: 0 supporting signs vs threshold 3 (Normal droppings pathway)."
+    },
+    {
+      "scenario_id": "K5",
+      "narrative": "Slight water drop only \u2014 single sign, not enough",
+      "expected": "Keep monitoring, no coccidiosis",
+      "actual": "Keep monitoring, no coccidiosis",
+      "match": true,
+      "supporting_signs_count": 1,
+      "supporting_signs": [
+        "Water consumption dropped below normal"
+      ],
+      "triggers": [],
+      "rationale": "Below Act-now threshold: 1 supporting signs vs threshold 3 (Normal droppings pathway)."
+    },
+    {
+      "scenario_id": "EDGE1",
+      "narrative": "Loose + exactly 2 signs (at threshold)",
+      "expected": "Act now",
+      "actual": "Act now",
+      "match": true,
+      "supporting_signs_count": 2,
+      "supporting_signs": [
+        "Not on dietary coccidiostat program",
+        "Litter damp or heavily caked and wet"
+      ],
+      "triggers": [],
+      "rationale": "Rule matched: Loose droppings + \u22652 supporting signs (2 signs present, threshold 2)."
+    },
+    {
+      "scenario_id": "EDGE2",
+      "narrative": "Normal + exactly 3 signs (at threshold)",
+      "expected": "Act now",
+      "actual": "Act now",
+      "match": true,
+      "supporting_signs_count": 3,
+      "supporting_signs": [
+        "Coccidiosis vaccination absent / unknown",
+        "Not on dietary coccidiostat program",
+        "Litter damp or heavily caked and wet"
+      ],
+      "triggers": [],
+      "rationale": "Rule matched: Normal droppings + \u22653 supporting signs (3 signs present, threshold 3)."
+    },
+    {
+      "scenario_id": "EDGE3",
+      "narrative": "Severe diarrhea + zero other signs \u2014 should NOT escalate to Emergency, but should still Act Now (severe diarrhea + 1 supporting sign needs 1)",
+      "expected": "Keep monitoring, no coccidiosis",
+      "actual": "Keep monitoring, no coccidiosis",
+      "match": true,
+      "supporting_signs_count": 0,
+      "supporting_signs": [],
+      "triggers": [],
+      "rationale": "Below Act-now threshold: 0 supporting signs vs threshold 1 (Severe diarrhea pathway)."
+    },
+    {
+      "scenario_id": "R1",
+      "narrative": "Older flock, vaccinated, healthy environment, mild paleness only",
+      "expected": "Keep monitoring, no coccidiosis",
+      "actual": "Keep monitoring, no coccidiosis",
+      "match": true,
+      "supporting_signs_count": 1,
+      "supporting_signs": [
+        "Noticeable paleness or depigmentation"
+      ],
+      "triggers": [],
+      "rationale": "Below Act-now threshold: 1 supporting signs vs threshold 3 (Normal droppings pathway)."
+    },
+    {
+      "scenario_id": "R2",
+      "narrative": "Young chicks, unvaccinated, dry well-managed environment",
+      "expected": "Act now",
+      "actual": "Act now",
+      "match": true,
+      "supporting_signs_count": 3,
+      "supporting_signs": [
+        "Flock is < 3 weeks old (immune naivety)",
+        "Coccidiosis vaccination absent / unknown",
+        "Not on dietary coccidiostat program"
+      ],
+      "triggers": [],
+      "rationale": "Rule matched: Normal droppings + \u22653 supporting signs (3 signs present, threshold 3)."
+    },
+    {
+      "scenario_id": "P1",
+      "narrative": "Loose droppings + 1 other sign \u2014 depends on loose_double_count",
+      "expected": "Keep monitoring, no coccidiosis",
+      "actual": "Keep monitoring, no coccidiosis",
+      "match": true,
+      "supporting_signs_count": 1,
+      "supporting_signs": [
+        "Litter damp or heavily caked and wet"
+      ],
+      "triggers": [],
+      "rationale": "Below Act-now threshold: 1 supporting signs vs threshold 2 (Loose droppings pathway)."
+    },
+    {
+      "scenario_id": "P2",
+      "narrative": "Older vaccinated flock with 3 management-only signs \u2014 tests age/vacc gate",
+      "expected": "Act now",
+      "actual": "Act now",
+      "match": true,
+      "supporting_signs_count": 3,
+      "supporting_signs": [
+        "Not on dietary coccidiostat program",
+        "Litter damp or heavily caked and wet",
+        "Misaligned / leaking drinkers creating wet spots"
+      ],
+      "triggers": [],
+      "rationale": "Rule matched: Normal droppings + \u22653 supporting signs (3 signs present, threshold 3)."
+    }
+  ]
+}
