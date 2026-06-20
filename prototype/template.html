@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CocciAlert, Interactive Demo, Adaptive Triage</title>
+<meta name="description" content="CocciAlert interactive demo. Adaptive decision-tree triage for suspected coccidiosis. Bilingual English and Yoruba. Same engine as engine/cocci_engine.py.">
+<!--
+  ============================================================================
+  This file is BUILT from prototype/src/* by prototype/build.py
+  Do NOT edit it directly. To change something, edit the matching source file
+  and rerun:  python prototype/build.py
+  ============================================================================
+-->
+<style>
+/* {{STYLES}} */
+</style>
+</head>
+<body>
+
+<header class="top-nav">
+  <div class="brand">
+    <div class="brand-logo">🐔</div>
+    <div class="brand-text">
+      <div class="brand-name">CocciAlert</div>
+      <div class="brand-org">BioBuild Africa Ltd</div>
+    </div>
+  </div>
+  <div class="title-block">
+    <div class="title-main" id="nav-title">Interactive Demo, Adaptive Triage for Suspected Coccidiosis</div>
+    <div class="title-sub" id="nav-subtitle">Controlled browser prototype, not live WhatsApp/USSD deployment.</div>
+  </div>
+  <div class="nav-actions">
+    <div class="lang-pill" role="group">
+      <button id="lang-en-btn" class="active">English</button>
+      <button id="lang-yo-btn">Yorùbá</button>
+    </div>
+    <button class="nav-btn emergency" id="demo-emergency-btn">Emergency Demo</button>
+    <button class="nav-btn act-now" id="demo-act-now-btn">Act Now Demo</button>
+    <button class="nav-btn keep-mon" id="demo-keep-mon-btn">Keep Monitoring Demo</button>
+    <div class="nav-sound" id="sound-toggle" title="Toggle audio">🔇 Sound: off</div>
+    <button class="nav-btn restart" id="restart-btn">↺ Restart</button>
+  </div>
+</header>
+
+<div id="yoruba-voice-banner" class="yoruba-voice-banner" style="display: none;"></div>
+
+<main class="main-grid">
+  <section class="panel">
+    <div class="panel-title"><span id="panel-left-title">Farmer Experience (Phone View)</span></div>
+    <div class="phone">
+      <div class="phone-screen">
+        <div class="phone-header">
+          <div class="phone-header-logo">🐔</div>
+          <div class="phone-header-text">
+            <div class="name">CocciAlert</div>
+            <div class="sub" id="phone-header-sub">Poultry Health Assistant</div>
+          </div>
+          <div class="phone-menu">☰</div>
+        </div>
+        <div class="phone-body" id="phone-body"></div>
+        <div class="phone-footer">
+          <span>Session: <span id="phone-session-id">DEMO-XXXXX</span></span>
+          <span>🔒</span>
+        </div>
+      </div>
+    </div>
+    <div class="phone-actions">
+      <span class="phone-action-btn">🔇 <span id="phone-sound-label">Sound off</span></span>
+      <span class="phone-action-btn">↺ <span id="phone-replay-label">Replay</span></span>
+    </div>
+  </section>
+
+  <section class="panel" id="center-panel"></section>
+
+  <section class="panel">
+    <div class="panel-title"><span id="panel-right-title">Backend Preview (Anonymized)</span></div>
+    <div id="backend-preview"></div>
+    <div class="result-legend">
+      <div class="result-legend-title" id="legend-title">Result Legend</div>
+      <div class="legend-item">
+        <div class="legend-dot emergency">!</div>
+        <div class="legend-text">
+          <strong id="legend-emergency-title">Emergency</strong>
+          <span id="legend-emergency-desc">Immediate veterinary help</span>
+        </div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot act-now">!</div>
+        <div class="legend-text">
+          <strong id="legend-act-title">Act Now</strong>
+          <span id="legend-act-desc">Take action soon</span>
+        </div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot keep-mon">✓</div>
+        <div class="legend-text">
+          <strong id="legend-keep-title">Keep Monitoring</strong>
+          <span id="legend-keep-desc">Continue monitoring</span>
+        </div>
+      </div>
+      <div class="legend-disclaimer" id="legend-disclaimer">Triage only, not diagnosis or prescription.</div>
+    </div>
+  </section>
+</main>
+
+<div class="global-footer">
+  Local TRL 3-4 demo. Same deterministic rule logic as <code>engine/cocci_engine.py</code>.
+  No data sent anywhere. <span id="footer-audio-note">Audio support enabled. Browser voice availability varies.</span>
+</div>
+
+<script>
+// {{SCRIPTS}}
+</script>
+</body>
+</html>

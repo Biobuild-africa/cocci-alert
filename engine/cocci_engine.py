@@ -23,7 +23,7 @@ convention without code change:
 
 Author: BioBuild Africa Ltd (RC 9604822)
 Clinical logic: Dr. Emmanuel Alagbe Oluwabukunmi (animal science, poultry)
-Engine implementation: Damilola / BioBuild Africa engineering
+Engine implementation: Johnson Adetooto / BioBuild Africa engineering
 """
 
 from dataclasses import dataclass, field

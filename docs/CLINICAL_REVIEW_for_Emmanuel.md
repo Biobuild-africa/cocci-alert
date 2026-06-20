@@ -47,7 +47,7 @@ The 14 questions are encoded as bounded enumerations matching the answer choices
 
 ## 3. Two clinical clarifications that need Emmanuel's decision
 
-These were noted in earlier conversations with Damilola as unresolved. Both are parameterised in code so they can be flipped without re-engineering. **Emmanuel should mark which interpretation he intends.**
+These were noted in earlier project discussions as unresolved. Both are parameterised in code so they can be flipped without re-engineering. **Emmanuel should mark which interpretation he intends.**
 
 ### 3.1 The "loose droppings" double-counting question
 

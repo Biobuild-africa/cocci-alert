@@ -1,0 +1,1975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CocciAlert, Interactive Demo, Adaptive Triage</title>
+<meta name="description" content="CocciAlert interactive demo. Adaptive decision-tree triage for suspected coccidiosis. Bilingual English and Yoruba. Same engine as engine/cocci_engine.py.">
+<!--
+  ============================================================================
+  This file is BUILT from prototype/src/* by prototype/build.py
+  Do NOT edit it directly. To change something, edit the matching source file
+  and rerun:  python prototype/build.py
+  ============================================================================
+-->
+<style>
+:root {
+    --nav-bg: #0a1929;
+    --nav-text: #ffffff;
+    --nav-sub: #94a3b8;
+    --brand-green: #16a34a;
+    --brand-green-soft: #dcfce7;
+    --brand-green-dark: #15803d;
+    --emergency: #dc2626;
+    --emergency-light: #fee2e2;
+    --emergency-dark: #991b1b;
+    --act-now: #ea580c;
+    --act-now-light: #ffedd5;
+    --act-now-dark: #9a3412;
+    --keep-mon: #16a34a;
+    --keep-mon-light: #dcfce7;
+    --keep-mon-dark: #15803d;
+    --ink: #0f172a;
+    --muted: #64748b;
+    --light-muted: #94a3b8;
+    --bg: #f1f5f9;
+    --panel-bg: #ffffff;
+    --border: #e2e8f0;
+    --border-strong: #cbd5e1;
+    --info-blue: #3b82f6;
+    --info-blue-light: #dbeafe;
+    --info-yellow: #f59e0b;
+    --info-yellow-light: #fef3c7;
+    --code-bg: #0f172a;
+    --code-text: #cbd5e1;
+    --code-key: #7dd3fc;
+    --code-val-str: #fde68a;
+    --code-val-num: #c4b5fd;
+    --code-val-bool: #fda4af;
+    --code-comment: #64748b;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ===== Top navigation bar ===== */
+  .top-nav {
+    background: var(--nav-bg);
+    color: var(--nav-text);
+    display: flex;
+    align-items: center;
+    padding: 14px 24px;
+    gap: 18px;
+    min-height: 76px;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+  }
+  .brand-logo {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--brand-green);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+  }
+  .brand-text { display: flex; flex-direction: column; line-height: 1.1; }
+  .brand-name { font-size: 1.3rem; font-weight: 800; color: white; }
+  .brand-org { font-size: 0.8rem; color: var(--brand-green); font-weight: 600; }
+  .title-block {
+    flex: 1; min-width: 0; padding: 0 16px; display: flex; flex-direction: column; gap: 2px;
+  }
+  .title-main {
+    color: white; font-size: 1.02rem; font-weight: 700; line-height: 1.25;
+  }
+  .title-sub {
+    color: var(--nav-sub); font-size: 0.78rem; line-height: 1.3;
+  }
+  .nav-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .lang-pill {
+    display: inline-flex; background: #1e293b; border-radius: 8px; padding: 3px;
+    border: 1px solid #334155;
+  }
+  .lang-pill button {
+    background: transparent; border: none; color: #94a3b8; padding: 7px 14px;
+    border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 0.85rem; font-weight: 600;
+  }
+  .lang-pill button.active {
+    background: var(--brand-green); color: white;
+  }
+  .nav-btn {
+    border: none; padding: 8px 14px; border-radius: 7px; cursor: pointer;
+    font-family: inherit; font-size: 0.82rem; font-weight: 600; color: white;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .nav-btn.emergency { background: var(--emergency); }
+  .nav-btn.emergency:hover { background: #b91c1c; }
+  .nav-btn.act-now { background: var(--act-now); }
+  .nav-btn.act-now:hover { background: #c2410c; }
+  .nav-btn.keep-mon { background: var(--keep-mon); }
+  .nav-btn.keep-mon:hover { background: #15803d; }
+  .nav-btn.restart {
+    background: transparent; border: 1.5px solid #475569; color: white;
+  }
+  .nav-btn.restart:hover { background: #1e293b; }
+  .nav-sound {
+    background: #1e293b; color: var(--light-muted);
+    padding: 7px 12px; border-radius: 7px; font-size: 0.78rem;
+    border: 1px dashed #475569; display: inline-flex; align-items: center; gap: 6px;
+  }
+
+  /* ===== Three-panel main grid ===== */
+  .main-grid {
+    display: grid;
+    grid-template-columns: minmax(300px, 1fr) minmax(380px, 1.3fr) minmax(340px, 1.2fr);
+    gap: 18px;
+    padding: 18px;
+    max-width: 1700px;
+    margin: 0 auto;
+  }
+  .panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    display: flex; flex-direction: column;
+  }
+  .panel-title {
+    font-size: 0.92rem; font-weight: 700; color: var(--ink);
+    margin: 0 0 14px; padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .panel-title-meta { font-size: 0.75rem; color: var(--muted); font-weight: 500; font-style: italic; }
+
+  /* ===== Left panel: phone view ===== */
+  .phone {
+    background: #1e293b;
+    border-radius: 26px;
+    padding: 8px;
+    margin: 0 auto;
+    width: 100%; max-width: 280px;
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.18);
+  }
+  .phone-screen {
+    background: #f8fafc;
+    border-radius: 20px;
+    min-height: 460px;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .phone-header {
+    background: var(--brand-green-dark);
+    color: white;
+    padding: 12px 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .phone-header-logo {
+    width: 28px; height: 28px; border-radius: 50%; background: white;
+    display: flex; align-items: center; justify-content: center; font-size: 0.95rem;
+  }
+  .phone-header-text { flex: 1; }
+  .phone-header-text .name { font-size: 0.9rem; font-weight: 700; line-height: 1.1; }
+  .phone-header-text .sub { font-size: 0.7rem; opacity: 0.85; }
+  .phone-menu { color: white; font-size: 1.1rem; opacity: 0.8; }
+  .phone-body {
+    flex: 1; padding: 12px; display: flex; flex-direction: column; gap: 10px;
+    background: #f8fafc; overflow-y: auto; max-height: 480px;
+  }
+  .bubble {
+    max-width: 88%; padding: 8px 12px; border-radius: 12px;
+    font-size: 0.78rem; line-height: 1.4; position: relative;
+  }
+  .bubble .ts {
+    display: block; font-size: 0.65rem; opacity: 0.65; margin-top: 4px;
+  }
+  .bubble.bot {
+    background: var(--brand-green-soft);
+    color: var(--ink);
+    border-bottom-left-radius: 4px;
+    align-self: flex-start;
+  }
+  .bubble.bot-q {
+    background: #ffffff;
+    color: var(--ink);
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 4px;
+    align-self: flex-start;
+  }
+  .bubble.user {
+    background: #d1fae5;
+    color: var(--ink);
+    border-bottom-right-radius: 4px;
+    align-self: flex-end;
+  }
+  .phone-options { display: flex; flex-direction: column; gap: 6px; }
+  .phone-opt {
+    background: white; border: 1px solid var(--brand-green); color: var(--brand-green-dark);
+    padding: 8px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 600;
+    text-align: left;
+  }
+  .phone-footer {
+    padding: 8px 14px; background: #e2e8f0; color: var(--muted);
+    font-size: 0.68rem; display: flex; justify-content: space-between; align-items: center;
+  }
+  .phone-actions {
+    display: flex; gap: 6px; margin-top: 10px; justify-content: center;
+  }
+  .phone-action-btn {
+    background: var(--panel-bg); border: 1px solid var(--border-strong);
+    padding: 5px 10px; border-radius: 6px; color: var(--muted); font-size: 0.72rem;
+    display: inline-flex; align-items: center; gap: 5px; cursor: not-allowed; opacity: 0.6;
+  }
+
+  /* ===== Center panel: question/result ===== */
+  .progress-row {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 6px;
+  }
+  .progress-label { font-size: 0.85rem; color: var(--muted); font-weight: 600; }
+  .progress-count { font-size: 0.85rem; color: var(--ink); font-weight: 700; }
+  .progress-bar {
+    height: 6px; background: var(--border); border-radius: 4px; overflow: hidden;
+    margin-bottom: 10px;
+  }
+  .progress-bar-fill {
+    height: 100%; background: linear-gradient(90deg, var(--brand-green), var(--brand-green-dark));
+    transition: width 0.3s ease; border-radius: 4px;
+  }
+  .progress-pct { text-align: right; font-size: 0.72rem; color: var(--muted); margin-bottom: 14px; }
+  .stages {
+    display: flex; gap: 6px; margin-bottom: 18px; align-items: center;
+  }
+  .stage {
+    display: flex; align-items: center; gap: 6px; font-size: 0.78rem;
+    color: var(--muted); font-weight: 600;
+  }
+  .stage-num {
+    width: 22px; height: 22px; border-radius: 50%; background: var(--border);
+    color: var(--muted); display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; font-weight: 700;
+  }
+  .stage.active .stage-num { background: var(--brand-green); color: white; }
+  .stage.active { color: var(--ink); }
+  .stage-arrow { color: var(--border-strong); font-size: 0.85rem; }
+
+  .stage-badge {
+    display: inline-block; padding: 5px 12px; border-radius: 999px;
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 14px;
+  }
+  .stage-badge.emergency { background: var(--brand-green-soft); color: var(--brand-green-dark); }
+  .stage-badge.supporting { background: #e0f2fe; color: #0369a1; }
+  .stage-badge.result { background: #f5d0fe; color: #86198f; }
+
+  .q-text {
+    font-size: 1.18rem; font-weight: 700; color: var(--ink);
+    line-height: 1.35; margin: 0 0 14px;
+  }
+  .q-helper {
+    background: var(--info-blue-light); color: #1e40af;
+    padding: 8px 12px; border-radius: 8px; font-size: 0.82rem;
+    margin-bottom: 14px; display: flex; gap: 8px; align-items: flex-start;
+  }
+  .q-helper-icon { color: var(--info-blue); flex-shrink: 0; }
+  .q-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+  .q-opt {
+    background: white; border: 2px solid var(--border-strong); border-radius: 12px;
+    padding: 14px 16px; cursor: pointer; font-family: inherit;
+    text-align: left; transition: all 0.15s ease;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .q-opt:hover {
+    border-color: var(--brand-green); background: var(--brand-green-soft);
+    transform: translateY(-1px);
+  }
+  .q-opt-num {
+    width: 28px; height: 28px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: 700; font-size: 0.85rem; flex-shrink: 0;
+  }
+  .q-opt-num.safe { background: var(--brand-green); }
+  .q-opt-num.warn { background: var(--act-now); }
+  .q-opt-num.danger { background: var(--emergency); }
+  .q-opt-num.neutral { background: var(--muted); }
+  .q-opt-text { font-size: 0.92rem; font-weight: 600; color: var(--ink); }
+  .q-opt-desc { font-size: 0.78rem; color: var(--muted); font-weight: 500; margin-top: 2px; }
+  .replay-row {
+    display: flex; gap: 8px; padding: 8px 0; border-top: 1px solid var(--border);
+    margin-bottom: 14px;
+  }
+  .replay-pill {
+    background: var(--bg); padding: 6px 12px; border-radius: 6px;
+    font-size: 0.78rem; color: var(--muted); border: 1px solid var(--border);
+    display: inline-flex; align-items: center; gap: 6px; opacity: 0.6;
+  }
+  .early-stop-note {
+    background: var(--info-yellow-light); padding: 10px 14px; border-radius: 10px;
+    border-left: 3px solid var(--info-yellow);
+    font-size: 0.82rem; color: #78350f;
+    display: flex; gap: 8px; align-items: flex-start;
+  }
+
+  /* Result card */
+  .result-card {
+    border-radius: 14px; overflow: hidden; margin-bottom: 14px;
+  }
+  .result-card-header {
+    padding: 18px 20px; color: white; display: flex; gap: 14px; align-items: center;
+  }
+  .result-card-header.emergency { background: var(--emergency); }
+  .result-card-header.act-now { background: var(--act-now); }
+  .result-card-header.keep-mon { background: var(--keep-mon); }
+  .result-icon {
+    width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.18);
+    display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;
+  }
+  .result-title { font-size: 1.4rem; font-weight: 800; line-height: 1.1; }
+  .result-subtitle { font-size: 0.88rem; opacity: 0.92; margin-top: 3px; }
+  .result-body {
+    padding: 18px 20px; background: var(--panel-bg); border: 1px solid var(--border);
+    border-top: none; border-radius: 0 0 14px 14px;
+  }
+  .result-message { font-size: 0.92rem; color: var(--ink); line-height: 1.55; margin-bottom: 14px; }
+  .result-stat {
+    background: var(--bg); padding: 10px 12px; border-radius: 8px;
+    font-size: 0.83rem; margin-bottom: 8px;
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  }
+  .result-stat-label { color: var(--muted); font-weight: 500; }
+  .result-stat-value { color: var(--ink); font-weight: 700; font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.82rem; }
+  .result-disclaimer {
+    font-size: 0.77rem; color: var(--muted); font-style: italic;
+    text-align: center; margin-top: 10px;
+  }
+
+  /* ===== Right panel: backend preview ===== */
+  .bp-section { margin-bottom: 16px; }
+  .bp-section:last-child { margin-bottom: 0; }
+  .bp-section-title {
+    font-size: 0.78rem; font-weight: 700; color: var(--ink);
+    text-transform: uppercase; letter-spacing: 0.04em;
+    margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid var(--border);
+  }
+  .bp-row {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    padding: 4px 0; font-size: 0.83rem;
+  }
+  .bp-row-label {
+    color: var(--muted); font-weight: 500;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .bp-row-value { color: var(--ink); font-weight: 600; font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.78rem; }
+  .bp-row-value.true { color: var(--brand-green-dark); }
+  .bp-row-value.false { color: var(--muted); }
+  .bp-row-value.blue { color: #2563eb; font-style: italic; }
+  .bp-answer-row {
+    background: var(--brand-green-soft);
+    padding: 8px 10px; border-radius: 6px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.76rem;
+    color: var(--brand-green-dark); margin-bottom: 4px;
+    display: flex; gap: 8px; align-items: center;
+  }
+  .bp-answer-q { color: var(--muted); font-weight: 700; }
+  .bp-answer-eq { color: var(--muted); }
+  .event-log-code {
+    background: var(--code-bg); color: var(--code-text);
+    border-radius: 8px; padding: 12px 14px;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.74rem; line-height: 1.55;
+    white-space: pre-wrap; word-break: break-word;
+  }
+  .event-log-code .k { color: var(--code-key); }
+  .event-log-code .s { color: var(--code-val-str); }
+  .event-log-code .n { color: var(--code-val-num); }
+  .event-log-code .b { color: var(--code-val-bool); }
+  .event-log-code .c { color: var(--code-comment); font-style: italic; }
+
+  .result-legend {
+    margin-top: 14px; padding: 12px;
+    background: var(--bg); border-radius: 10px;
+  }
+  .result-legend-title {
+    font-size: 0.78rem; font-weight: 700; color: var(--ink); margin-bottom: 8px;
+  }
+  .legend-item {
+    display: flex; gap: 10px; align-items: center; margin-bottom: 6px; font-size: 0.78rem;
+  }
+  .legend-dot {
+    width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; color: white; font-size: 0.85rem;
+  }
+  .legend-dot.emergency { background: var(--emergency); }
+  .legend-dot.act-now { background: var(--act-now); }
+  .legend-dot.keep-mon { background: var(--keep-mon); }
+  .legend-text strong { color: var(--ink); display: block; font-size: 0.82rem; }
+  .legend-text span { color: var(--muted); font-size: 0.73rem; }
+  .legend-disclaimer {
+    font-size: 0.72rem; color: var(--muted); font-style: italic;
+    margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);
+    text-align: center;
+  }
+
+  /* Footer note */
+  .global-footer {
+    text-align: center; font-size: 0.72rem; color: var(--muted);
+    padding: 16px; max-width: 900px; margin: 0 auto;
+  }
+  .global-footer code {
+    background: var(--panel-bg); padding: 1px 6px; border-radius: 4px;
+    font-size: 0.92em; border: 1px solid var(--border);
+  }
+/* ========================================================================
+   Pass 2 audio additions (additive only; nothing else above is changed)
+   ====================================================================== */
+
+/* Sound toggle: clickable, with on/off states */
+.nav-sound {
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.nav-sound:hover {
+  background: #334155;
+  color: white;
+}
+.nav-sound.on {
+  background: var(--brand-green);
+  color: white;
+  border: 1px solid var(--brand-green-dark);
+  border-style: solid;
+}
+.nav-sound.on:hover {
+  background: var(--brand-green-dark);
+}
+
+/* Replay-row buttons become real clickable pills when sound is on */
+.replay-pill.replay-btn {
+  cursor: pointer;
+  border: 1px solid var(--border);
+  font-family: inherit;
+  font-size: 0.78rem;
+  transition: all 0.15s ease;
+}
+.replay-pill.replay-btn.inactive {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.replay-pill.replay-btn.active {
+  background: var(--info-blue-light);
+  color: #1e40af;
+  border-color: var(--info-blue);
+  opacity: 1;
+}
+.replay-pill.replay-btn.active:hover {
+  background: var(--info-blue);
+  color: white;
+}
+
+/* Yoruba voice fallback banner: only displays when language is Yoruba,
+   sound is on, and no Yoruba voice is available on the device. */
+.yoruba-voice-banner {
+  background: var(--info-yellow-light);
+  color: #78350f;
+  padding: 10px 24px;
+  font-size: 0.85rem;
+  border-bottom: 2px solid var(--info-yellow);
+  text-align: center;
+  font-weight: 500;
+}
+
+</style>
+</head>
+<body>
+
+<header class="top-nav">
+  <div class="brand">
+    <div class="brand-logo">🐔</div>
+    <div class="brand-text">
+      <div class="brand-name">CocciAlert</div>
+      <div class="brand-org">BioBuild Africa Ltd</div>
+    </div>
+  </div>
+  <div class="title-block">
+    <div class="title-main" id="nav-title">Interactive Demo, Adaptive Triage for Suspected Coccidiosis</div>
+    <div class="title-sub" id="nav-subtitle">Controlled browser prototype, not live WhatsApp/USSD deployment.</div>
+  </div>
+  <div class="nav-actions">
+    <div class="lang-pill" role="group">
+      <button id="lang-en-btn" class="active">English</button>
+      <button id="lang-yo-btn">Yorùbá</button>
+    </div>
+    <button class="nav-btn emergency" id="demo-emergency-btn">Emergency Demo</button>
+    <button class="nav-btn act-now" id="demo-act-now-btn">Act Now Demo</button>
+    <button class="nav-btn keep-mon" id="demo-keep-mon-btn">Keep Monitoring Demo</button>
+    <div class="nav-sound" id="sound-toggle" title="Toggle audio">🔇 Sound: off</div>
+    <button class="nav-btn restart" id="restart-btn">↺ Restart</button>
+  </div>
+</header>
+
+<div id="yoruba-voice-banner" class="yoruba-voice-banner" style="display: none;"></div>
+
+<main class="main-grid">
+  <section class="panel">
+    <div class="panel-title"><span id="panel-left-title">Farmer Experience (Phone View)</span></div>
+    <div class="phone">
+      <div class="phone-screen">
+        <div class="phone-header">
+          <div class="phone-header-logo">🐔</div>
+          <div class="phone-header-text">
+            <div class="name">CocciAlert</div>
+            <div class="sub" id="phone-header-sub">Poultry Health Assistant</div>
+          </div>
+          <div class="phone-menu">☰</div>
+        </div>
+        <div class="phone-body" id="phone-body"></div>
+        <div class="phone-footer">
+          <span>Session: <span id="phone-session-id">DEMO-XXXXX</span></span>
+          <span>🔒</span>
+        </div>
+      </div>
+    </div>
+    <div class="phone-actions">
+      <span class="phone-action-btn">🔇 <span id="phone-sound-label">Sound off</span></span>
+      <span class="phone-action-btn">↺ <span id="phone-replay-label">Replay</span></span>
+    </div>
+  </section>
+
+  <section class="panel" id="center-panel"></section>
+
+  <section class="panel">
+    <div class="panel-title"><span id="panel-right-title">Backend Preview (Anonymized)</span></div>
+    <div id="backend-preview"></div>
+    <div class="result-legend">
+      <div class="result-legend-title" id="legend-title">Result Legend</div>
+      <div class="legend-item">
+        <div class="legend-dot emergency">!</div>
+        <div class="legend-text">
+          <strong id="legend-emergency-title">Emergency</strong>
+          <span id="legend-emergency-desc">Immediate veterinary help</span>
+        </div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot act-now">!</div>
+        <div class="legend-text">
+          <strong id="legend-act-title">Act Now</strong>
+          <span id="legend-act-desc">Take action soon</span>
+        </div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot keep-mon">✓</div>
+        <div class="legend-text">
+          <strong id="legend-keep-title">Keep Monitoring</strong>
+          <span id="legend-keep-desc">Continue monitoring</span>
+        </div>
+      </div>
+      <div class="legend-disclaimer" id="legend-disclaimer">Triage only, not diagnosis or prescription.</div>
+    </div>
+  </section>
+</main>
+
+<div class="global-footer">
+  Local TRL 3-4 demo. Same deterministic rule logic as <code>engine/cocci_engine.py</code>.
+  No data sent anywhere. <span id="footer-audio-note">Audio support enabled. Browser voice availability varies.</span>
+</div>
+
+<script>
+// ============ src/engine.js ============
+// =============================================================================
+// CocciAlert rule engine, JavaScript port of engine/cocci_engine.py
+//
+// SCOPE OF THIS FILE
+//   Internal codes and decision rules ONLY. No display text. No language.
+//   Same outputs as the Python engine on identical inputs.
+//
+// WHAT TO EDIT WHERE
+//   - To change a clinical rule, threshold, or sign list, edit this file
+//     AND the matching rule in engine/cocci_engine.py so they stay in sync.
+//   - All farmer-facing wording lives in src/i18n.en.js and src/i18n.yo.js.
+//   - The asking order lives in src/flow_controller.js.
+// =============================================================================
+
+// ----- Enum-like constants (stable internal codes) -----
+
+const Droppings = { NORMAL: "Normal (Firm)", LOOSE: "Loose", SEVERE_DIARRHEA: "Severe Diarrhea" };
+const Hunched   = { WIDESPREAD: "Widespread (>10%)", ISOLATED: "Isolated (<10%)", NONE: "None" };
+const Feed      = { AT_OR_ABOVE: "At/Above Target", SLIGHT_DROP: "Slight Drop (<10%)", SIGNIFICANT_DROP: "Significant Drop (>10%)" };
+const Water     = { NORMAL: "Normal", SLIGHT: "Slight Drop", SIGNIFICANT: "Significant Drop" };
+const Age       = { UNDER_3W: "< 3 weeks", THREE_TO_8W: "3 to 8 weeks", OVER_8W: "> 8 weeks" };
+const Vacc      = { YES: "Yes", NO: "No", UNKNOWN: "Unknown" };
+const Mort      = { NONE: "No", GRADUAL: "Gradual Increase", SUDDEN_SPIKE: "Sudden Spike" };
+const Litter    = { DRY: "Dry & Friable", DAMP: "Damp", HEAVILY_CAKED_WET: "Heavily Caked & Wet" };
+
+const Triage = {
+  EMERGENCY: "Emergency",
+  ACT_NOW: "Act now",
+  KEEP_MONITORING: "Keep monitoring, no coccidiosis"
+};
+
+// ----- Question schema (key + valid answer codes + ui accent) -----
+// Stable: this drives the controller. UI text comes from i18n.
+
+const SCHEMA = [
+  { key: "fresh_blood",      options: [{code: true,  accent: "danger"}, {code: false, accent: "safe"}] },
+  { key: "orange_mucus",     options: [{code: true,  accent: "danger"}, {code: false, accent: "safe"}] },
+  { key: "mortality",        options: [{code: Mort.NONE, accent: "safe"}, {code: Mort.GRADUAL, accent: "warn"}, {code: Mort.SUDDEN_SPIKE, accent: "danger"}] },
+  { key: "droppings",        options: [{code: Droppings.NORMAL, accent: "safe"}, {code: Droppings.LOOSE, accent: "warn"}, {code: Droppings.SEVERE_DIARRHEA, accent: "danger"}] },
+  { key: "hunched",          options: [{code: Hunched.WIDESPREAD, accent: "danger"}, {code: Hunched.ISOLATED, accent: "warn"}, {code: Hunched.NONE, accent: "safe"}] },
+  { key: "huddling",         options: [{code: true, accent: "warn"}, {code: false, accent: "safe"}] },
+  { key: "paleness",         options: [{code: true, accent: "warn"}, {code: false, accent: "safe"}] },
+  { key: "feed",             options: [{code: Feed.AT_OR_ABOVE, accent: "safe"}, {code: Feed.SLIGHT_DROP, accent: "warn"}, {code: Feed.SIGNIFICANT_DROP, accent: "danger"}] },
+  { key: "water",            options: [{code: Water.NORMAL, accent: "safe"}, {code: Water.SLIGHT, accent: "warn"}, {code: Water.SIGNIFICANT, accent: "danger"}] },
+  { key: "age",              options: [{code: Age.UNDER_3W, accent: "warn"}, {code: Age.THREE_TO_8W, accent: "neutral"}, {code: Age.OVER_8W, accent: "safe"}] },
+  { key: "vacc",             options: [{code: Vacc.YES, accent: "safe"}, {code: Vacc.NO, accent: "warn"}, {code: Vacc.UNKNOWN, accent: "warn"}] },
+  { key: "coccidiostat",     options: [{code: true, accent: "safe"}, {code: false, accent: "warn"}] },
+  { key: "litter",           options: [{code: Litter.DRY, accent: "safe"}, {code: Litter.DAMP, accent: "warn"}, {code: Litter.HEAVILY_CAKED_WET, accent: "danger"}] },
+  { key: "leaking_drinkers", options: [{code: true, accent: "warn"}, {code: false, accent: "safe"}] }
+];
+
+// ----- Supporting-sign tally (operates on partial answer sets) -----
+
+function collectSupportingSigns(a) {
+  const signs = [];
+  if (a.hunched === Hunched.WIDESPREAD) signs.push("hunched_widespread");
+  if (a.huddling === true) signs.push("huddling");
+  if (a.paleness === true) signs.push("paleness");
+  if (a.feed === Feed.SLIGHT_DROP || a.feed === Feed.SIGNIFICANT_DROP) signs.push("feed_drop");
+  if (a.water === Water.SLIGHT || a.water === Water.SIGNIFICANT) signs.push("water_drop");
+  if (a.age === Age.UNDER_3W) signs.push("age_under_3w");
+  if (a.vacc === Vacc.NO || a.vacc === Vacc.UNKNOWN) signs.push("no_vacc");
+  if (a.coccidiostat === false) signs.push("no_coccidiostat");
+  if (a.mortality === Mort.GRADUAL) signs.push("gradual_mortality");
+  if (a.litter === Litter.DAMP || a.litter === Litter.HEAVILY_CAKED_WET) signs.push("damp_litter");
+  if (a.leaking_drinkers === true) signs.push("leaking_drinkers");
+  return signs;
+}
+
+// ----- Partial decision evaluator -----
+// Operates on a partial answer set. Returns:
+//   null if no decision can be made yet (controller should ask more).
+//   {outcome, reason_code, ...} the moment a decision is determined.
+// Uses the same rules as evaluatePartial would on a fully populated set,
+// so the final answer set is consistent with engine/cocci_engine.py.
+
+function evaluatePartial(a) {
+  // 1. Emergency triggers (any one fires Emergency immediately).
+  if (a.fresh_blood === true) {
+    return { outcome: Triage.EMERGENCY, reason_code: "fresh_blood_in_droppings",
+             triggers: ["Fresh blood visible in droppings"] };
+  }
+  if (a.orange_mucus === true) {
+    return { outcome: Triage.EMERGENCY, reason_code: "orange_mucus_or_sloughed_tissue",
+             triggers: ["Orange mucus or sloughed intestinal tissue"] };
+  }
+  if (a.mortality === Mort.SUDDEN_SPIKE) {
+    return { outcome: Triage.EMERGENCY, reason_code: "sudden_mortality_spike",
+             triggers: ["Sudden mortality spike"] };
+  }
+  // Severe diarrhea + major systemic sign = Emergency.
+  if (a.droppings === Droppings.SEVERE_DIARRHEA) {
+    const majors = [];
+    if (a.hunched === Hunched.WIDESPREAD) majors.push("widespread hunched posture");
+    if (a.huddling === true) majors.push("widespread huddling");
+    if (a.paleness === true) majors.push("noticeable paleness");
+    if (a.feed === Feed.SIGNIFICANT_DROP) majors.push("significant feed drop");
+    if (a.water === Water.SIGNIFICANT) majors.push("significant water drop");
+    if (majors.length > 0) {
+      return { outcome: Triage.EMERGENCY, reason_code: "severe_diarrhea_with_systemic",
+               triggers: ["Severe diarrhea with " + majors.join(", ")] };
+    }
+  }
+
+  // 2. Emergency must be fully cleared before non-emergency outcomes.
+  // Cleared means: Q1, Q2, Q12, Q3 all answered. If Q3=severe, also Q4-Q8.
+  const emergencyCleared = (
+    a.fresh_blood !== undefined &&
+    a.orange_mucus !== undefined &&
+    a.mortality !== undefined &&
+    a.droppings !== undefined &&
+    (a.droppings !== Droppings.SEVERE_DIARRHEA ||
+      (a.hunched !== undefined && a.huddling !== undefined &&
+       a.paleness !== undefined && a.feed !== undefined && a.water !== undefined))
+  );
+  if (!emergencyCleared) return null;
+
+  // 3. Supporting-sign tally with threshold based on Q3 droppings.
+  const signs = collectSupportingSigns(a);
+  const n = signs.length;
+  let threshold, reason_code;
+  if (a.droppings === Droppings.SEVERE_DIARRHEA) {
+    threshold = 1; reason_code = "severe_threshold_reached";
+  } else if (a.droppings === Droppings.LOOSE) {
+    threshold = 2; reason_code = "loose_threshold_reached";
+  } else {
+    threshold = 3; reason_code = "normal_threshold_reached";
+  }
+  if (n >= threshold) {
+    return { outcome: Triage.ACT_NOW, reason_code, signs, signsCount: n, threshold };
+  }
+
+  // 4. All 14 asked, no emergency, no Act-now threshold = Keep monitoring.
+  const allKeys = SCHEMA.map(s => s.key);
+  const allAnswered = allKeys.every(k => a[k] !== undefined);
+  if (allAnswered) {
+    return { outcome: Triage.KEEP_MONITORING, reason_code: "all_questions_answered",
+             signs, signsCount: n, threshold };
+  }
+
+  // 5. Indeterminate, controller should ask more.
+  return null;
+}
+
+
+// ============ src/flow_controller.js ============
+// =============================================================================
+// CocciAlert adaptive flow controller
+//
+// SCOPE OF THIS FILE
+//   The order in which the controller asks the 14 questions, plus the
+//   "decide-or-continue" loop. Uses the engine rules in src/engine.js; never
+//   invents separate clinical logic.
+//
+// WHAT TO EDIT WHERE
+//   - To change the asking order, edit STAGE_A_ORDER, SEVERE_SUBCHECK_ORDER,
+//     and STAGE_B_ORDER below.
+//   - Clinical thresholds and rules live in src/engine.js (and the Python
+//     engine they mirror).
+// =============================================================================
+
+// Stage A: emergency-screen questions, asked in this order.
+// Each one short-circuits the moment it triggers Emergency.
+const STAGE_A_ORDER = ["fresh_blood", "orange_mucus", "mortality", "droppings"];
+
+// If droppings answer is SEVERE_DIARRHEA, ask these next to check for major
+// systemic signs. Any one in its "major" form fires Emergency.
+const SEVERE_SUBCHECK_ORDER = ["hunched", "huddling", "paleness", "feed", "water"];
+
+// Stage B: supporting-sign questions, asked one at a time. After each answer
+// the engine checks if the Act-now threshold has been reached.
+const STAGE_B_ORDER = ["hunched", "huddling", "paleness", "feed", "water",
+                       "age", "vacc", "coccidiostat", "litter", "leaking_drinkers"];
+
+function pickNextQuestion(answers) {
+  // Stage A: emergency screen.
+  for (const k of STAGE_A_ORDER) {
+    if (answers[k] === undefined) return { key: k, stage: "emergency" };
+  }
+  // Severe-diarrhea sub-check (only when Q3 = severe).
+  if (answers.droppings === Droppings.SEVERE_DIARRHEA) {
+    for (const k of SEVERE_SUBCHECK_ORDER) {
+      if (answers[k] === undefined) return { key: k, stage: "emergency" };
+    }
+  }
+  // Stage B: supporting signs.
+  for (const k of STAGE_B_ORDER) {
+    if (answers[k] === undefined) return { key: k, stage: "supporting" };
+  }
+  return null;
+}
+
+// Test helper: replay a fully-specified answer set through the controller and
+// stop the moment a decision fires. Returns the final state.
+function runScenario(initialAnswers) {
+  const localState = { answers: {}, questionsAsked: [], decision: null };
+  let safety = 30;
+  while (!localState.decision && safety-- > 0) {
+    const next = pickNextQuestion(localState.answers);
+    if (!next) break;
+    if (!(next.key in initialAnswers)) break;
+    localState.answers[next.key] = initialAnswers[next.key];
+    localState.questionsAsked.push(next.key);
+    localState.decision = evaluatePartial(localState.answers);
+  }
+  return localState;
+}
+
+
+// ============ src/audio.js ============
+// =============================================================================
+// CocciAlert audio layer (Pass 2)
+//
+// SCOPE OF THIS FILE
+//   Browser-native text-to-speech (window.speechSynthesis) plus three
+//   synthesized tones (Web Audio API OscillatorNode). Nothing here touches
+//   engine.js, flow_controller.js, or any clinical logic. Audio is purely
+//   additive on top of the existing adaptive flow.
+//
+// RULES
+//   - Sound is OFF by default. The user must turn Sound On before any audio.
+//   - Audio uses browser-native APIs only. No external services, no audio
+//     files, no CDN dependency.
+//   - If Yoruba voice is not present on the device, the Yoruba TEXT still
+//     displays correctly; a small fallback note tells the reviewer that
+//     Yoruba audio depends on device voice support.
+//   - Toggling Sound Off cancels any ongoing speech immediately.
+// =============================================================================
+
+const Audio = (function() {
+
+  // ----- Module state -----
+  let soundOn = false;
+  let yorubaVoiceAvailable = null;   // null until checked, then true/false
+  let audioCtx = null;
+  let voicesLoaded = false;
+
+  // Web Audio context can only be created after a user gesture; lazy init.
+  function ensureAudioContext() {
+    if (audioCtx) return audioCtx;
+    const Ctor = (typeof window !== "undefined") &&
+                 (window.AudioContext || window.webkitAudioContext);
+    if (!Ctor) return null;
+    audioCtx = new Ctor();
+    return audioCtx;
+  }
+
+  // ----- Tone synthesis (Web Audio) -----
+
+  function playTone(ctx, freq, when, duration, peakGain, type) {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type || "sine";
+    osc.frequency.value = freq;
+    // Short attack, exponential-ish decay for a clean tone with no clicks.
+    gain.gain.setValueAtTime(0, when);
+    gain.gain.linearRampToValueAtTime(peakGain, when + 0.025);
+    gain.gain.linearRampToValueAtTime(0,        when + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(when);
+    osc.stop(when + duration + 0.02);
+  }
+
+  // Emergency: two descending notes, serious. ~450ms total.
+  function playEmergencyTone() {
+    const ctx = ensureAudioContext();
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    playTone(ctx, 659.25, t,        0.20, 0.30, "sine");  // E5
+    playTone(ctx, 523.25, t + 0.22, 0.25, 0.30, "sine");  // C5 (descending)
+  }
+
+  // Act Now: single warm chime. ~300ms.
+  function playActNowTone() {
+    const ctx = ensureAudioContext();
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    playTone(ctx, 587.33, t, 0.30, 0.22, "sine");   // D5 warm
+  }
+
+  // Keep Monitoring: soft confirmation. ~200ms.
+  function playKeepMonTone() {
+    const ctx = ensureAudioContext();
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    playTone(ctx, 783.99, t, 0.20, 0.14, "sine");   // G5 soft
+  }
+
+  // ----- Speech synthesis -----
+
+  function ttsAvailable() {
+    return typeof window !== "undefined" && "speechSynthesis" in window;
+  }
+
+  function pickVoice(langCode) {
+    if (!ttsAvailable()) return null;
+    const voices = window.speechSynthesis.getVoices();
+    // langCode is "en" or "yo"
+    // Try exact prefix match (e.g., "yo-NG", "en-US", "en-GB")
+    const match = voices.find(v => (v.lang || "").toLowerCase().startsWith(langCode.toLowerCase()));
+    return match || null;
+  }
+
+  function checkYorubaVoice() {
+    if (!ttsAvailable()) { yorubaVoiceAvailable = false; return false; }
+    const voices = window.speechSynthesis.getVoices();
+    // If the browser has not loaded any voices at all yet, OR has loaded
+    // voices but none match Yoruba, treat both as "Yoruba audio unavailable"
+    // so the fallback banner is shown. If voices later finish loading and
+    // a Yoruba voice appears, the voiceschanged listener will flip the flag
+    // back to true and the banner is hidden on the next render.
+    if (voices.length === 0) {
+      yorubaVoiceAvailable = false;
+      voicesLoaded = false;
+      return false;
+    }
+    yorubaVoiceAvailable = voices.some(v => (v.lang || "").toLowerCase().startsWith("yo"));
+    voicesLoaded = true;
+    return yorubaVoiceAvailable;
+  }
+
+  function speak(text, langCode) {
+    if (!soundOn) return false;
+    if (!ttsAvailable()) return false;
+    // Cancel any ongoing utterance first.
+    window.speechSynthesis.cancel();
+    // If Yoruba is requested but no Yoruba voice exists, do NOT fall back to
+    // English voice reading Yoruba text. Display fallback note in UI instead.
+    if (langCode === "yo") {
+      if (yorubaVoiceAvailable === null) checkYorubaVoice();
+      if (yorubaVoiceAvailable === false) return false;
+    }
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = (langCode === "yo") ? "yo-NG" : "en-US";
+    u.rate = 0.95;
+    u.pitch = 1.0;
+    u.volume = 1.0;
+    const voice = pickVoice(langCode);
+    if (voice) u.voice = voice;
+    window.speechSynthesis.speak(u);
+    return true;
+  }
+
+  // ----- Public API -----
+
+  function setSoundOn(enabled) {
+    soundOn = !!enabled;
+    if (soundOn) {
+      ensureAudioContext();
+      if (yorubaVoiceAvailable === null) checkYorubaVoice();
+    } else {
+      if (ttsAvailable()) window.speechSynthesis.cancel();
+    }
+  }
+
+  function isSoundOn() { return soundOn; }
+
+  // Returns true / false / null.  null means "voices haven't loaded yet,
+  // we don't know yet". UI should re-query after the voiceschanged event.
+  function isYorubaVoiceAvailable() { return yorubaVoiceAvailable; }
+
+  // Read a question (or any short text) in the chosen language. Idempotent
+  // when sound is off (returns false silently).
+  function readQuestion(text, langCode) {
+    return speak(text, langCode);
+  }
+
+  // Play the appropriate tone for an outcome and then read the message
+  // shortly afterwards so the tone and speech do not collide.
+  function readResult(outcomeShortKey, message, langCode) {
+    if (!soundOn) return;
+    if (outcomeShortKey === "emergency") {
+      playEmergencyTone();
+      setTimeout(() => speak(message, langCode), 600);
+    } else if (outcomeShortKey === "act_now") {
+      playActNowTone();
+      setTimeout(() => speak(message, langCode), 450);
+    } else {
+      playKeepMonTone();
+      setTimeout(() => speak(message, langCode), 350);
+    }
+  }
+
+  function stopAllAudio() {
+    if (ttsAvailable()) window.speechSynthesis.cancel();
+  }
+
+  // Wire the voiceschanged event so we re-check Yoruba availability as soon
+  // as the browser finishes loading its voice list.
+  if (typeof window !== "undefined" && ttsAvailable()) {
+    window.speechSynthesis.addEventListener("voiceschanged", () => {
+      const before = yorubaVoiceAvailable;
+      checkYorubaVoice();
+      // If main.js attached a listener, give it a chance to re-render the note
+      if (typeof window.__onVoicesChanged === "function" && before !== yorubaVoiceAvailable) {
+        window.__onVoicesChanged();
+      }
+    });
+    // Try once eagerly in case voices are already loaded
+    checkYorubaVoice();
+  }
+
+  return {
+    setSoundOn, isSoundOn,
+    isYorubaVoiceAvailable,
+    readQuestion, readResult,
+    stopAllAudio,
+    // Exposed for the headless test that just checks the module exists
+    _ttsAvailable: ttsAvailable
+  };
+})();
+
+
+// ============ src/i18n.en.js ============
+// =============================================================================
+// CocciAlert English UI dictionary
+//
+// SCOPE OF THIS FILE
+//   Every English-language string the demo displays. To change a question,
+//   button label, result message, helper text, or backend-preview label in
+//   English, edit only this file.
+//
+// LINK TO YORUBA
+//   The shape of this object MUST stay identical to src/i18n.yo.js.
+//   The keys here are what render templates look up.
+// =============================================================================
+
+const i18n_en = {
+
+  // ----- Top navigation bar -----
+  nav_title: "Interactive Demo, Adaptive Triage for Suspected Coccidiosis",
+  nav_subtitle: "Controlled browser prototype, not live WhatsApp/USSD deployment.",
+  demo_emergency: "Emergency Demo",
+  demo_act_now: "Act Now Demo",
+  demo_keep_mon: "Keep Monitoring Demo",
+  sound_off: "Sound: off",
+  sound_on: "Sound: on",
+  restart: "Restart",
+
+  // ----- Audio status messages (Pass 2) -----
+  audio_listen_now: "Listen to question",
+  audio_off_hint: "Click the Sound toggle to listen",
+  yoruba_voice_unavailable: "Yorùbá text is displayed; audio support depends on device or browser voice support.",
+
+  // ----- Panel headers -----
+  panel_left_title: "Farmer Experience (Phone View)",
+  panel_right_title: "Backend Preview (Anonymized)",
+
+  // ----- Phone (farmer view) -----
+  phone_header_sub: "Poultry Health Assistant",
+  phone_welcome: "Welcome. I will ask some questions about your flock so I can guide you. Reply to each question.",
+  phone_sound: "Sound off",
+  phone_sound_on: "Sound on",
+  phone_replay: "Replay",
+  footer_audio_note: "Audio support enabled. Browser voice availability varies.",
+
+  // ----- Progress + stage indicators -----
+  progress: "Progress",
+  question_n_of_14: "Question {n} of 14",
+  stage_emergency: "Emergency Check",
+  stage_supporting: "Supporting Signs",
+  stage_result: "Result",
+  badge_emergency: "EMERGENCY SCREENING",
+  badge_supporting: "SUPPORTING SIGNS",
+  badge_result: "RESULT",
+  early_stop_note: "We will stop early if we have enough information to give you the right guidance.",
+  tap_to_hear: "Tap to hear question",
+  replay_question: "Replay Question",
+
+  // ----- Backend Preview, Session Summary section -----
+  session_summary: "Session Summary",
+  consent_given: "Consent given",
+  language_label: "Language",
+  raw_phone_stored: "Raw phone stored",
+  geography_level: "Geography level",
+  geography_value: "LGA only",
+  session_id: "Session ID",
+
+  // ----- Backend Preview, Answers So Far section -----
+  answers_so_far: "Answers So Far (Internal Codes)",
+
+  // ----- Backend Preview, Triage Engine Status section -----
+  triage_engine_status: "Triage Engine Status",
+  stage_label: "Stage",
+  early_stopping: "Early stopping",
+  early_not_triggered: "Not triggered yet",
+  early_triggered: "Triggered",
+  questions_answered: "Questions answered",
+  rationale: "Rationale",
+  current_assessment: "Current assessment",
+  collecting_info: "Collecting information...",
+  decided_emergency: "Emergency decided",
+  decided_act_now: "Act Now decided",
+  decided_keep_mon: "Keep Monitoring decided",
+
+  // ----- Backend Preview, Event Log section -----
+  event_log_preview: "Event Log Preview (Row that would be saved)",
+
+  // ----- Result Legend -----
+  legend_title: "Result Legend",
+  legend_emergency_title: "Emergency",
+  legend_emergency_desc: "Immediate veterinary help",
+  legend_act_title: "Act Now",
+  legend_act_desc: "Take action soon",
+  legend_keep_title: "Keep Monitoring",
+  legend_keep_desc: "Continue monitoring",
+  legend_disclaimer: "Triage only, not diagnosis or prescription.",
+
+  // ----- Result card content -----
+  result_title_emergency: "EMERGENCY",
+  result_title_act_now: "ACT NOW",
+  result_title_keep_mon: "KEEP MONITORING",
+  result_subtitle_emergency: "Contact a veterinarian immediately.",
+  result_subtitle_act_now: "Take action and contact a veterinarian soon.",
+  result_subtitle_keep_mon: "No immediate action needed.",
+  result_msg_emergency: "Your flock shows a danger sign that needs urgent veterinary attention. This is triage, not a diagnosis. Do not self-medicate. Isolate visibly sick birds and document droppings if possible.",
+  result_msg_act_now: "Your answers suggest your flock is at risk of coccidiosis. Remove wet litter, isolate sick birds, fix leaking drinkers, and contact a veterinary officer or approved agro-vet. Do not self-medicate with antibiotics.",
+  result_msg_keep_mon: "No red-flag coccidiosis pattern detected today. Maintain dry litter, biosecurity, clean water, and recheck droppings, feed, and water tomorrow. This is triage, not a diagnosis.",
+  decision_reached: "Decision reached after {n} of 14 possible questions.",
+  early_stopping_reason_label: "Early stopping reason",
+
+  // ----- Per-question helper notes (only for emergency-screen questions) -----
+  helper_fresh_blood: "This is the first check for danger signs.",
+  helper_orange_mucus: "Orange mucus or sloughed tissue is a serious warning sign.",
+  helper_mortality: "Sudden flock death needs urgent attention.",
+  helper_droppings: "Droppings consistency tells us a lot about flock health.",
+
+  // ----- The 14 questions -----
+  questions: {
+    fresh_blood: {
+      q: "Are there visible signs of fresh blood in the droppings?",
+      opts: {
+        true: { text: "Yes", desc: "There is fresh blood." },
+        false: { text: "No", desc: "No fresh blood visible." }
+      }
+    },
+    orange_mucus: {
+      q: "Is there orange mucus or sloughed intestinal tissue present?",
+      opts: {
+        true: { text: "Yes", desc: "Orange mucus or tissue visible." },
+        false: { text: "No", desc: "Droppings look normal in color." }
+      }
+    },
+    mortality: {
+      q: "Has daily mortality exceeded the expected baseline for this age?",
+      opts: {
+        [Mort.NONE]:         { text: "No",                desc: "Mortality is normal for this age." },
+        [Mort.GRADUAL]:      { text: "Gradual increase",  desc: "Slightly more deaths than usual." },
+        [Mort.SUDDEN_SPIKE]: { text: "Sudden spike",      desc: "Many deaths in a short time." }
+      }
+    },
+    droppings: {
+      q: "What is the predominant consistency of the droppings?",
+      opts: {
+        [Droppings.NORMAL]:          { text: "Normal, firm",        desc: "Solid, well-formed droppings." },
+        [Droppings.LOOSE]:           { text: "Loose",               desc: "Softer than usual but not watery." },
+        [Droppings.SEVERE_DIARRHEA]: { text: "Severe diarrhea",     desc: "Very watery, mostly liquid." }
+      }
+    },
+    hunched: {
+      q: "Are birds exhibiting a hunched posture with ruffled feathers?",
+      opts: {
+        [Hunched.WIDESPREAD]: { text: "Widespread, over 10% of flock",  desc: "Many birds are affected." },
+        [Hunched.ISOLATED]:   { text: "Isolated, under 10% of flock",   desc: "Only a few birds are affected." },
+        [Hunched.NONE]:       { text: "None",                           desc: "Birds look alert and active." }
+      }
+    },
+    huddling: {
+      q: "Are birds huddling together despite adequate ambient temperatures?",
+      opts: {
+        true:  { text: "Yes", desc: "Birds are clumping even though it is warm." },
+        false: { text: "No",  desc: "Birds are spread out normally." }
+      }
+    },
+    paleness: {
+      q: "Is there noticeable paleness or depigmentation in the skin, shanks, or combs?",
+      opts: {
+        true:  { text: "Yes", desc: "Skin or combs look pale." },
+        false: { text: "No",  desc: "Color looks normal." }
+      }
+    },
+    feed: {
+      q: "How has daily feed intake changed over the last 48 hours?",
+      opts: {
+        [Feed.AT_OR_ABOVE]:      { text: "At or above target",          desc: "Birds are eating normally." },
+        [Feed.SLIGHT_DROP]:      { text: "Slight drop, under 10%",      desc: "Eating a little less than usual." },
+        [Feed.SIGNIFICANT_DROP]: { text: "Significant drop, over 10%",  desc: "Eating much less than usual." }
+      }
+    },
+    water: {
+      q: "How has daily water consumption changed?",
+      opts: {
+        [Water.NORMAL]:      { text: "Normal",            desc: "Birds are drinking as usual." },
+        [Water.SLIGHT]:      { text: "Slight drop",       desc: "Drinking a little less than usual." },
+        [Water.SIGNIFICANT]: { text: "Significant drop",  desc: "Drinking much less than usual." }
+      }
+    },
+    age: {
+      q: "What is the current age of the flock?",
+      opts: {
+        [Age.UNDER_3W]:    { text: "Less than 3 weeks", desc: "Very young chicks." },
+        [Age.THREE_TO_8W]: { text: "3 to 8 weeks",      desc: "Growing birds." },
+        [Age.OVER_8W]:     { text: "More than 8 weeks", desc: "Older birds." }
+      }
+    },
+    vacc: {
+      q: "Was the flock vaccinated for coccidiosis at the hatchery?",
+      opts: {
+        [Vacc.YES]:     { text: "Yes",     desc: "Vaccination confirmed." },
+        [Vacc.NO]:      { text: "No",      desc: "Not vaccinated." },
+        [Vacc.UNKNOWN]: { text: "Unknown", desc: "Not sure about vaccination." }
+      }
+    },
+    coccidiostat: {
+      q: "Is the flock currently on a dietary coccidiostat program in the feed?",
+      opts: {
+        true:  { text: "Yes", desc: "Coccidiostat is in the feed." },
+        false: { text: "No",  desc: "No coccidiostat in the feed." }
+      }
+    },
+    litter: {
+      q: "What is the overall physical condition of the litter?",
+      opts: {
+        [Litter.DRY]:               { text: "Dry and friable",       desc: "Litter is dry and loose." },
+        [Litter.DAMP]:              { text: "Damp",                  desc: "Litter has some wetness." },
+        [Litter.HEAVILY_CAKED_WET]: { text: "Heavily caked and wet", desc: "Litter is wet and stuck together." }
+      }
+    },
+    leaking_drinkers: {
+      q: "Are there misaligned or leaking drinkers creating localized wet spots?",
+      opts: {
+        true:  { text: "Yes", desc: "Drinkers are leaking or off-position." },
+        false: { text: "No",  desc: "Drinkers are working properly." }
+      }
+    }
+  }
+};
+
+
+// ============ src/i18n.yo.js ============
+// =============================================================================
+// CocciAlert Yoruba (Yorùbá) UI dictionary
+//
+// SCOPE OF THIS FILE
+//   Every Yoruba-language string the demo displays. To change any Yoruba
+//   wording, edit only this file.
+//
+// APPROVAL STATUS
+//   This file is the SOURCE OF TRUTH for what Emmanuel reviews in
+//   docs/YORUBA_LOCALIZATION_REVIEW.md. The review file is generated
+//   from this dictionary plus src/i18n.en.js (see
+//   prototype/generate_yoruba_review.py).
+//
+// COCCIDIOSIS NAME RULE (from Emmanuel)
+//   The English word "coccidiosis" is kept as the technical disease name in
+//   Yoruba sentences. The disease is explained in farmer Yoruba alongside it
+//   (àrùn inú adìẹ tí ó lè fa ìgbẹ́ gbuuru...), not invented as a fake
+//   Yoruba disease term.
+//
+// LINK TO ENGLISH
+//   The shape of this object MUST stay identical to src/i18n.en.js.
+// =============================================================================
+
+const i18n_yo = {
+
+  // ----- Top navigation bar -----
+  nav_title: "Àpẹẹrẹ Ìfọ̀rọ̀wérọ̀, Ìtọ́nisọ́nà Tó Ń Bá Ipele Mu fún Coccidiosis",
+  nav_subtitle: "Àpẹẹrẹ browser tí a ń dán wò, kì í ṣe WhatsApp tàbí USSD gidi.",
+  demo_emergency: "Àpẹẹrẹ Pàjáwìrì",
+  demo_act_now: "Àpẹẹrẹ Ṣe Ìgbésẹ̀ Báyìí",
+  demo_keep_mon: "Àpẹẹrẹ Máa Ṣọ́",
+  sound_off: "Ohùn: kò sí",
+  sound_on: "Ohùn: ń ṣiṣẹ́",
+  restart: "Bẹ̀rẹ̀ lẹ́ẹ̀kansi",
+
+  // ----- Audio status messages (Pass 2) -----
+  audio_listen_now: "Gbọ́ ìbéèrè",
+  audio_off_hint: "Tẹ Ohùn láti gbọ́",
+  yoruba_voice_unavailable: "À ń fi ọ̀rọ̀ Yorùbá hàn. Ìrànlọ́wọ́ ohùn dá lé ìtìlẹ́yìn ohùn fóònù tàbí browser.",
+
+  // ----- Panel headers -----
+  panel_left_title: "Ìrírí Àgbẹ̀ (Wíwo Fóònù)",
+  panel_right_title: "Wíwo Backend (Láì fi orúkọ hàn)",
+
+  // ----- Phone (farmer view) -----
+  phone_header_sub: "Olùrànlọ́wọ́ Ìlera Adìẹ",
+  phone_welcome: "Ẹ kú àbọ̀. Mo máa béèrè ìbéèrè díẹ̀ nípa àwọn adìẹ rẹ kí n lè tọ́ ọ sọ́nà. Dáhùn ìbéèrè kọ̀ọ̀kan.",
+  phone_sound: "Ohùn kò sí",
+  phone_sound_on: "Ohùn ń ṣiṣẹ́",
+  phone_replay: "Tún ṣe",
+  footer_audio_note: "Ìtìlẹ́yìn ohùn ti ṣiṣẹ́. Ìmọ̀ ohùn browser yàtọ̀ síra wọn.",
+
+  // ----- Progress + stage indicators -----
+  progress: "Ìlọsíwájú",
+  question_n_of_14: "Ìbéèrè {n} nínú 14",
+  stage_emergency: "Ìṣàyẹ̀wò Pàjáwìrì",
+  stage_supporting: "Àpẹẹrẹ Ìṣàmúlò",
+  stage_result: "Àbájáde",
+  badge_emergency: "ÌṢÀYẸ̀WÒ PÀJÁWÌRÌ",
+  badge_supporting: "ÀPẸẸRẸ ÌṢÀMÚLÒ",
+  badge_result: "ÀBÁJÁDE",
+  early_stop_note: "A máa dúró kíákíá tí a bá ní ìmọ̀ tó láti fún ọ ní ìtọ́nisọ́nà tó tọ́.",
+  tap_to_hear: "Tẹ láti gbọ́ ìbéèrè",
+  replay_question: "Tún Ìbéèrè ṣe",
+
+  // ----- Backend Preview, Session Summary section -----
+  session_summary: "Àkójọpọ̀ Ìpàdé",
+  consent_given: "A ti gba ìfẹ́wọ́sí",
+  language_label: "Èdè",
+  raw_phone_stored: "Ṣé a pa nọ́mbà fóònù gidi mọ́",
+  geography_level: "Ìpele agbègbè",
+  geography_value: "LGA nìkan",
+  session_id: "Idi Ìpàdé",
+
+  // ----- Backend Preview, Answers So Far section -----
+  answers_so_far: "Àwọn Ìdáhùn Títí di Ìsisìyí (Kóòdù Inú)",
+
+  // ----- Backend Preview, Triage Engine Status section -----
+  triage_engine_status: "Ipò Engine Ìtọ́nisọ́nà",
+  stage_label: "Ìpele",
+  early_stopping: "Ìdúró kíákíá",
+  early_not_triggered: "Kò tíì ṣẹlẹ̀",
+  early_triggered: "Ó ti ṣẹlẹ̀",
+  questions_answered: "Àwọn ìbéèrè tí a ti dáhùn",
+  rationale: "Ìdí ìpinnu",
+  current_assessment: "Ìṣàyẹ̀wò báyìí",
+  collecting_info: "À ń kó ìmọ̀ jọ...",
+  decided_emergency: "Pàjáwìrì ti dájú",
+  decided_act_now: "Ṣe Ìgbésẹ̀ Báyìí ti dájú",
+  decided_keep_mon: "Máa Ṣọ́ ti dájú",
+
+  // ----- Backend Preview, Event Log section -----
+  event_log_preview: "Wíwo Event Log (Ọ̀wọ́n tó máa wà ní àkọsílẹ̀)",
+
+  // ----- Result Legend -----
+  legend_title: "Ìtumọ̀ àwọn àbájáde",
+  legend_emergency_title: "Pàjáwìrì",
+  legend_emergency_desc: "Ìrànlọ́wọ́ dókítà ẹranko lẹ́sẹ̀kẹsẹ",
+  legend_act_title: "Ṣe Ìgbésẹ̀ Báyìí",
+  legend_act_desc: "Ṣe ohun kan láìpẹ́",
+  legend_keep_title: "Máa Ṣọ́",
+  legend_keep_desc: "Máa bá ìṣàyẹ̀wò lọ",
+  legend_disclaimer: "Ìtọ́nisọ́nà nìkan, kì í ṣe ìdánimọ̀ àrùn tàbí ìpàṣẹ oogun.",
+
+  // ----- Result card content -----
+  result_title_emergency: "PÀJÁWÌRÌ",
+  result_title_act_now: "ṢE ÌGBÉSẸ̀ BÁYÌÍ",
+  result_title_keep_mon: "MÁA ṢỌ́",
+  result_subtitle_emergency: "Pe dókítà ẹranko lẹ́sẹ̀kẹsẹ.",
+  result_subtitle_act_now: "Ṣe ìgbésẹ̀ kí o sì pe dókítà ẹranko láìpẹ́.",
+  result_subtitle_keep_mon: "Kò sí ìgbésẹ̀ kíákíá tí a nílò.",
+  result_msg_emergency: "Àwọn adìẹ rẹ ní àmì ewu tó nílò ìrànlọ́wọ́ dókítà ẹranko kíákíá. Èyí jẹ́ ìtọ́nisọ́nà, kì í ṣe ìdánimọ̀ àrùn. Má ṣe fi oogun fún ara rẹ. Yà àwọn adìẹ tí ó ń ṣàìsàn sílẹ̀, ya àwòrán ìgbẹ́ wọn bí ó bá ṣeé ṣe.",
+  result_msg_act_now: "Ìdáhùn rẹ fihàn pé àwọn adìẹ rẹ wà nínú ewu coccidiosis. Yọ ohun tí wọ́n fi bo ilẹ̀ ilé adìẹ tí ó tutu kúrò. Yà àwọn adìẹ tí ó ń ṣàìsàn sílẹ̀. Tún ohun mímu omi tí ń jo ṣe. Pe dókítà ẹranko, vet, tàbí agro-vet tí a fọwọ́ sí. Má ṣe lo antibiotics láì gba ìmọ̀ràn.",
+  result_msg_keep_mon: "Kò sí àpẹẹrẹ ewu coccidiosis tó lágbára tó hàn lónìí. Jẹ́ kí ohun tí wọ́n fi bo ilẹ̀ ilé adìẹ máa gbẹ. Pa ààbò ilé adìẹ mọ́. Pèsè omi mímọ́. Tún ṣàyẹ̀wò ìgbẹ́, oúnjẹ, àti omi wọn lọ́la. Èyí jẹ́ ìtọ́nisọ́nà, kì í ṣe ìdánimọ̀ àrùn.",
+  decision_reached: "Ìpinnu dé lẹ́yìn ìbéèrè {n} nínú àwọn ìbéèrè 14 tó ṣeé ṣe.",
+  early_stopping_reason_label: "Ìdí ìdúró kíákíá",
+
+  // ----- Per-question helper notes (only for emergency-screen questions) -----
+  helper_fresh_blood: "Èyí ni ìṣàyẹ̀wò àkọ́kọ́ fún àmì ewu.",
+  helper_orange_mucus: "Ohun alálẹ̀mọ́ aláwọ̀ ọ́sàn jẹ́ àmì ewu tó lágbára.",
+  helper_mortality: "Ikú adìẹ lojijì nílò ìgbésẹ̀ kíákíá.",
+  helper_droppings: "Bí ìgbẹ́ ṣe rí ń sọ ọ̀pọ̀ nípa ìlera adìẹ.",
+
+  // ----- The 14 questions -----
+  questions: {
+    fresh_blood: {
+      q: "Ṣé ẹ̀jẹ̀ pupa tí ó dà bí tuntun hàn nínú ìgbẹ́ àwọn adìẹ?",
+      opts: {
+        true:  { text: "Bẹ́ẹ̀ni", desc: "Ẹ̀jẹ̀ tuntun wà." },
+        false: { text: "Rárá",    desc: "Ẹ̀jẹ̀ tuntun kò hàn." }
+      }
+    },
+    orange_mucus: {
+      q: "Ṣé ohun alálẹ̀mọ́ aláwọ̀ ọ́sàn, tàbí nkan bí ẹran inú, hàn nínú ìgbẹ́ àwọn adìẹ?",
+      opts: {
+        true:  { text: "Bẹ́ẹ̀ni", desc: "Ohun aláwọ̀ ọ́sàn hàn." },
+        false: { text: "Rárá",    desc: "Àwọ̀ ìgbẹ́ jọ́ bí ti deede." }
+      }
+    },
+    mortality: {
+      q: "Ṣé iye adìẹ tí ń kú lojoojúmọ́ ti pọ̀ ju ohun tí o máa ń retí lọ?",
+      opts: {
+        [Mort.NONE]:         { text: "Rárá",                       desc: "Ikú adìẹ wà ní deede." },
+        [Mort.GRADUAL]:      { text: "Ó ń pọ̀ sí i díẹ̀díẹ̀",        desc: "Ikú díẹ̀ ju ti deede lọ." },
+        [Mort.SUDDEN_SPIKE]: { text: "Ó pọ̀ sí i lojijì",           desc: "Adìẹ púpọ̀ kú nínú àkókò kúkúrú." }
+      }
+    },
+    droppings: {
+      q: "Báwo ni ìgbẹ́ àwọn adìẹ ṣe rí jù lọ?",
+      opts: {
+        [Droppings.NORMAL]:          { text: "Ó dáa, ó sì ní ìdúró",                          desc: "Ìgbẹ́ le, ó dáa." },
+        [Droppings.LOOSE]:           { text: "Ó rọ̀",                                          desc: "Ó rọ̀ díẹ̀ ju ti deede lọ." },
+        [Droppings.SEVERE_DIARRHEA]: { text: "Ó dà bí omi púpọ̀, ìgbẹ́ gbuuru tó le",          desc: "Ó dà bí omi gan-an." }
+      }
+    },
+    hunched: {
+      q: "Ṣé àwọn adìẹ ń wọ́ ara wọn sílẹ̀, tí ìyẹ́ wọn sì ń rú?",
+      opts: {
+        [Hunched.WIDESPREAD]: { text: "Bẹ́ẹ̀ni, ó pọ̀ ju 10% lọ",         desc: "Àwọn adìẹ púpọ̀ ni ó kàn." },
+        [Hunched.ISOLATED]:   { text: "Díẹ̀ nìkan, kéré ju 10% lọ",      desc: "Adìẹ díẹ̀ nìkan ni ó kàn." },
+        [Hunched.NONE]:       { text: "Rárá",                            desc: "Àwọn adìẹ wà ní ìjọ́gun dáadáa." }
+      }
+    },
+    huddling: {
+      q: "Ṣé àwọn adìẹ ń kó ara wọn jọ bí ẹni pé òtútù ń mú wọn, bó tilẹ̀ jẹ́ pé ilé adìẹ kò tútù?",
+      opts: {
+        true:  { text: "Bẹ́ẹ̀ni", desc: "Wọ́n ń kó ara wọn jọ pẹ̀lú òtútù." },
+        false: { text: "Rárá",    desc: "Wọ́n túká dáadáa." }
+      }
+    },
+    paleness: {
+      q: "Ṣé awọ ara, ẹsẹ̀, tàbí àpá pupa lórí àwọn adìẹ ti ń pálẹ̀ ju bó ṣe yẹ lọ?",
+      opts: {
+        true:  { text: "Bẹ́ẹ̀ni", desc: "Awọ tàbí àpá pupa pálẹ̀." },
+        false: { text: "Rárá",    desc: "Àwọ̀ jọ́ bí ti deede." }
+      }
+    },
+    feed: {
+      q: "Báwo ni iye oúnjẹ tí àwọn adìẹ ń jẹ ṣe yí padà ní ọjọ́ méjì sẹ́yìn?",
+      opts: {
+        [Feed.AT_OR_ABOVE]:      { text: "Wọ́n ń jẹun bó ṣe yẹ tàbí ju bẹ́ẹ̀ lọ",   desc: "Wọ́n ń jẹun bí ti deede." },
+        [Feed.SLIGHT_DROP]:      { text: "Wọ́n ń jẹun díẹ̀ kere ju ti tẹ́lẹ̀ lọ",   desc: "Wọ́n ń jẹun díẹ̀." },
+        [Feed.SIGNIFICANT_DROP]: { text: "Wọ́n ń jẹun púpọ̀ kere ju ti tẹ́lẹ̀ lọ", desc: "Wọ́n kò jẹun rárá." }
+      }
+    },
+    water: {
+      q: "Báwo ni mímu omi àwọn adìẹ ṣe yí padà?",
+      opts: {
+        [Water.NORMAL]:      { text: "Deede",                                       desc: "Wọ́n ń mu omi bí ti deede." },
+        [Water.SLIGHT]:      { text: "Wọ́n ń mu omi díẹ̀ kere ju ti tẹ́lẹ̀ lọ",     desc: "Mímu omi dín kù díẹ̀." },
+        [Water.SIGNIFICANT]: { text: "Wọ́n ń mu omi púpọ̀ kere ju ti tẹ́lẹ̀ lọ",    desc: "Mímu omi dín kù púpọ̀." }
+      }
+    },
+    age: {
+      q: "Ọmọ ọ̀sẹ̀ mélòó ni àwọn adìẹ wọ̀nyí?",
+      opts: {
+        [Age.UNDER_3W]:    { text: "Kéré ju ọ̀sẹ̀ mẹ́ta lọ",          desc: "Àwọn ọmọ kéékèèké." },
+        [Age.THREE_TO_8W]: { text: "Láàárín ọ̀sẹ̀ mẹ́ta sí mẹ́jọ",     desc: "Àwọn adìẹ tí ń dàgbà." },
+        [Age.OVER_8W]:     { text: "Ju ọ̀sẹ̀ mẹ́jọ lọ",                desc: "Àwọn adìẹ àgbà." }
+      }
+    },
+    vacc: {
+      q: "Níbi tí wọ́n ti yọ àwọn adìẹ náà, ṣé wọ́n fún wọn ní ajẹsára lòdì sí coccidiosis?",
+      opts: {
+        [Vacc.YES]:     { text: "Bẹ́ẹ̀ni", desc: "A fún wọn ní ajẹsára." },
+        [Vacc.NO]:      { text: "Rárá",    desc: "A kò fún wọn ní ajẹsára." },
+        [Vacc.UNKNOWN]: { text: "Mi ò mọ̀", desc: "Mi kò mọ̀ àfojúsùn ajẹsára." }
+      }
+    },
+    coccidiostat: {
+      q: "Ṣé oúnjẹ tí o ń fún àwọn adìẹ ní ohun ìdènà coccidiosis nínú rẹ̀ báyìí?",
+      opts: {
+        true:  { text: "Bẹ́ẹ̀ni", desc: "Ohun ìdènà wà nínú oúnjẹ." },
+        false: { text: "Rárá",    desc: "Kò sí ohun ìdènà nínú oúnjẹ." }
+      }
+    },
+    litter: {
+      q: "Báwo ni ohun tí wọ́n fi bo ilẹ̀ ilé adìẹ ṣe rí lápapọ̀?",
+      opts: {
+        [Litter.DRY]:               { text: "Ó gbẹ, ó sì tú dáadáa",        desc: "Ó gbẹ, kò tutu." },
+        [Litter.DAMP]:              { text: "Ó tutu díẹ̀",                  desc: "Ó ní omi díẹ̀ nínú." },
+        [Litter.HEAVILY_CAKED_WET]: { text: "Ó dì pọ̀, ó sì tutu gan-an",   desc: "Ó tutu gan-an, ó sì dì pọ̀." }
+      }
+    },
+    leaking_drinkers: {
+      q: "Ṣé omi ń jo láti inú ohun tí adìẹ fi ń mu omi, tàbí ohun náà kò dúró dáadáa, tó sì ń mú kí ìtẹ́ adìẹ tutu ní àwọn ibi kan?",
+      opts: {
+        true:  { text: "Bẹ́ẹ̀ni", desc: "Omi ń jo." },
+        false: { text: "Rárá",    desc: "Ohun mímu omi ń ṣiṣẹ́ dáadáa." }
+      }
+    }
+  }
+};
+
+
+// ============ src/demo_scenarios.js ============
+// =============================================================================
+// CocciAlert demo scenarios
+//
+// SCOPE OF THIS FILE
+//   Three fully-specified answer sets that the demo buttons replay through
+//   the adaptive controller. Each one is chosen so it stops at a different
+//   point and produces a different outcome.
+//
+// WHAT TO EDIT WHERE
+//   - To change which question chain a demo button shows, edit the answer
+//     dict here.
+//   - To change a demo button label, edit i18n.en.js / i18n.yo.js.
+//   - To change which scenarios run in the headless test, edit
+//     src/test_adaptive_demo.js.
+// =============================================================================
+
+const DEMO_SCENARIOS = {
+
+  // Emergency in 1 question: fresh_blood = true short-circuits.
+  emergency: {
+    fresh_blood: true
+  },
+
+  // Act Now in 6 questions: Q1=no, Q2=no, Q12=no spike, Q3=loose,
+  // then Q4=widespread (sign 1), Q5=yes (sign 2). Threshold reached.
+  act_now: {
+    fresh_blood: false,
+    orange_mucus: false,
+    mortality: Mort.NONE,
+    droppings: Droppings.LOOSE,
+    hunched: Hunched.WIDESPREAD,
+    huddling: true
+  },
+
+  // Keep Monitoring in 14 questions: all 14 must be ruled out before the
+  // engine can conclude no coccidiosis pattern is present.
+  keep_monitoring: {
+    fresh_blood: false,
+    orange_mucus: false,
+    mortality: Mort.NONE,
+    droppings: Droppings.NORMAL,
+    hunched: Hunched.NONE,
+    huddling: false,
+    paleness: false,
+    feed: Feed.AT_OR_ABOVE,
+    water: Water.NORMAL,
+    age: Age.OVER_8W,
+    vacc: Vacc.YES,
+    coccidiostat: true,
+    litter: Litter.DRY,
+    leaking_drinkers: false
+  }
+};
+
+
+// ============ src/main.js ============
+// =============================================================================
+// CocciAlert main UI module
+//
+// SCOPE OF THIS FILE
+//   Session state, render functions, controller wiring, boot. The DOM-touching
+//   layer. Reads from i18n_en, i18n_yo, SCHEMA, DEMO_SCENARIOS, and the
+//   engine/controller functions, but never declares them.
+//
+// WHAT TO EDIT WHERE
+//   - All wording lives in src/i18n.en.js and src/i18n.yo.js.
+//   - Demo button scenarios live in src/demo_scenarios.js.
+//   - Clinical rules live in src/engine.js.
+//   - Layout/CSS lives in src/styles.css.
+// =============================================================================
+
+const i18n = { en: i18n_en, yo: i18n_yo };
+
+const ENGINE_VERSION = "0.1.0";
+const SCHEMA_VERSION = "1.0";
+
+// Per-question helper text lookup (only emergency-screen questions get one)
+function getHelperText(L, key) {
+  if (key === "fresh_blood")  return L.helper_fresh_blood;
+  if (key === "orange_mucus") return L.helper_orange_mucus;
+  if (key === "mortality")    return L.helper_mortality;
+  if (key === "droppings")    return L.helper_droppings;
+  return null;
+}
+
+// ----- Session state -----
+
+const state = {
+  lang: "en",
+  answers: {},
+  decision: null,          // null while collecting; populated when engine decides
+  questionsAsked: [],      // ordered list of question keys
+  sessionId: "DEMO-" + Math.random().toString(36).slice(2, 7).toUpperCase(),
+  consentTimeISO: new Date().toISOString(),
+  finished: false,
+  // Pass 2 audio flag. Sound is OFF by default per spec; user gesture turns
+  // it on via the top-bar toggle. The Audio module owns its own state too;
+  // we track it here so renderers can update visual indicators.
+  soundOn: false
+};
+
+function t() { return i18n[state.lang]; }
+function esc(s) {
+  if (s === null || s === undefined) return "";
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+                   .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+
+// ----- Render -----
+
+function render() {
+  renderNav();
+  renderLeftPanel();
+  renderCenterPanel();
+  renderRightPanel();
+}
+
+function renderNav() {
+  const L = t();
+  document.getElementById("nav-title").textContent = L.nav_title;
+  document.getElementById("nav-subtitle").textContent = L.nav_subtitle;
+  document.getElementById("demo-emergency-btn").textContent = L.demo_emergency;
+  document.getElementById("demo-act-now-btn").textContent = L.demo_act_now;
+  document.getElementById("demo-keep-mon-btn").textContent = L.demo_keep_mon;
+  // Pass 2: sound toggle reflects current state and the speaker/mute icon flips
+  const soundLabel = state.soundOn ? L.sound_on : L.sound_off;
+  const soundIcon  = state.soundOn ? "🔊" : "🔇";
+  document.getElementById("sound-toggle").innerHTML = soundIcon + " " + esc(soundLabel);
+  document.getElementById("sound-toggle").classList.toggle("on", state.soundOn);
+  document.getElementById("restart-btn").innerHTML = "↺ " + esc(L.restart);
+  document.getElementById("lang-en-btn").classList.toggle("active", state.lang === "en");
+  document.getElementById("lang-yo-btn").classList.toggle("active", state.lang === "yo");
+  // Footer audio note: bilingual, updated on every render
+  const footerNote = document.getElementById("footer-audio-note");
+  if (footerNote) footerNote.textContent = L.footer_audio_note;
+  // Yoruba-voice fallback banner: visible only when Yoruba is selected,
+  // sound is on, and the browser has no Yoruba voice loaded.
+  renderYorubaVoiceNote(L);
+}
+
+function renderYorubaVoiceNote(L) {
+  const banner = document.getElementById("yoruba-voice-banner");
+  if (!banner) return;
+  const yoSelected = state.lang === "yo";
+  const yoVoice = Audio.isYorubaVoiceAvailable();
+  // Show only when Yoruba selected, sound on, and voice missing or unknown=false
+  const shouldShow = yoSelected && state.soundOn && yoVoice === false;
+  banner.style.display = shouldShow ? "" : "none";
+  banner.textContent = L.yoruba_voice_unavailable;
+}
+
+function renderLeftPanel() {
+  const L = t();
+  document.getElementById("panel-left-title").textContent = L.panel_left_title;
+  document.getElementById("phone-header-sub").textContent = L.phone_header_sub;
+  document.getElementById("phone-session-id").textContent = state.sessionId;
+  // Phone sound label tracks the actual top-bar sound state
+  document.getElementById("phone-sound-label").textContent = state.soundOn ? L.phone_sound_on : L.phone_sound;
+  document.getElementById("phone-replay-label").textContent = L.phone_replay;
+
+  const body = document.getElementById("phone-body");
+  body.innerHTML = "";
+  body.appendChild(makeBubble("bot", L.phone_welcome, "10:30"));
+
+  state.questionsAsked.forEach((qKey, idx) => {
+    const qLoc = L.questions[qKey];
+    const answer = state.answers[qKey];
+    const optLabel = qLoc.opts[String(answer)].text;
+    const num = idx + 1;
+    body.appendChild(makeBubble("bot-q", "Q" + num + ". " + qLoc.q, "10:3" + (1+idx)));
+    body.appendChild(makeBubble("user", optLabel, "10:3" + (1+idx)));
+  });
+
+  if (state.finished && state.decision) {
+    const titleKey = "result_title_" + outcomeShortKey(state.decision.outcome);
+    body.appendChild(makeBubble("bot", "→ " + L[titleKey], "10:40"));
+  } else if (!state.finished) {
+    const next = pickNextQuestion(state.answers);
+    if (next) {
+      const qLoc = L.questions[next.key];
+      const num = state.questionsAsked.length + 1;
+      const optsHtml = SCHEMA.find(s => s.key === next.key).options.map((opt, i) => {
+        const text = qLoc.opts[String(opt.code)].text;
+        return '<div class="phone-opt">' + (i+1) + ". " + esc(text) + "</div>";
+      }).join("");
+      const wrap = document.createElement("div");
+      wrap.appendChild(makeBubble("bot-q", "Q" + num + ". " + qLoc.q, "10:3" + Math.min(9, num)));
+      const optsDiv = document.createElement("div");
+      optsDiv.className = "phone-options";
+      optsDiv.innerHTML = optsHtml;
+      wrap.appendChild(optsDiv);
+      body.appendChild(wrap);
+    }
+  }
+
+  body.scrollTop = body.scrollHeight;
+}
+
+function makeBubble(klass, text, ts) {
+  const div = document.createElement("div");
+  div.className = "bubble " + klass;
+  div.innerHTML = esc(text) + '<span class="ts">' + esc(ts) + " AM</span>";
+  return div;
+}
+
+function renderCenterPanel() {
+  const L = t();
+  const panel = document.getElementById("center-panel");
+
+  if (state.finished && state.decision) {
+    panel.innerHTML = renderResultHtml(L);
+    // Pass 2 wiring: play tone + read result message when sound is on.
+    // Tone choice and timing live in audio.js, not here.
+    if (state.soundOn) {
+      const okey = outcomeShortKey(state.decision.outcome);
+      const msg = L["result_msg_" + okey];
+      // small delay so the visual result lands before audio
+      setTimeout(() => Audio.readResult(okey, msg, state.lang), 150);
+    }
+    return;
+  }
+
+  const next = pickNextQuestion(state.answers);
+  if (!next) {
+    panel.innerHTML = '<div class="panel-title">' + esc(L.stage_result) + '</div>';
+    return;
+  }
+
+  const qLoc = L.questions[next.key];
+  const schemaItem = SCHEMA.find(s => s.key === next.key);
+  const helper = getHelperText(L, next.key);
+  const totalQ = SCHEMA.length;
+  const askedSoFar = state.questionsAsked.length;
+  const pct = Math.round((askedSoFar / totalQ) * 100);
+  const questionNum = askedSoFar + 1;
+
+  const stageBadgeClass = next.stage === "emergency" ? "emergency" : "supporting";
+  const stageBadgeLabel = next.stage === "emergency" ? L.badge_emergency : L.badge_supporting;
+
+  const stageActiveIdx = next.stage === "emergency" ? 0 : 1;
+  const stagesHtml = ['emergency','supporting','result'].map((s, i) => {
+    const label = i === 0 ? L.stage_emergency : i === 1 ? L.stage_supporting : L.stage_result;
+    const active = i === stageActiveIdx ? "active" : "";
+    return '<div class="stage ' + active + '"><div class="stage-num">' + (i+1) + '</div>' + esc(label) + '</div>' +
+           (i < 2 ? '<span class="stage-arrow">›</span>' : '');
+  }).join("");
+
+  const optsHtml = schemaItem.options.map((opt, i) => {
+    const optLoc = qLoc.opts[String(opt.code)];
+    return '<button class="q-opt" data-i="' + i + '">' +
+           '  <div class="q-opt-num ' + opt.accent + '">' + (i+1) + '</div>' +
+           '  <div>' +
+           '    <div class="q-opt-text">' + esc(optLoc.text) + '</div>' +
+           '    <div class="q-opt-desc">' + esc(optLoc.desc) + '</div>' +
+           '  </div>' +
+           '</button>';
+  }).join("");
+
+  panel.innerHTML =
+    '<div class="progress-row">' +
+    '  <span class="progress-label">' + esc(L.progress) + '</span>' +
+    '  <span class="progress-count">' + esc(L.question_n_of_14.replace("{n}", questionNum)) + '</span>' +
+    '</div>' +
+    '<div class="progress-bar"><div class="progress-bar-fill" style="width:' + pct + '%;"></div></div>' +
+    '<div class="progress-pct">' + pct + '%</div>' +
+    '<div class="stages">' + stagesHtml + '</div>' +
+    '<div class="stage-badge ' + stageBadgeClass + '">' + esc(stageBadgeLabel) + '</div>' +
+    '<div class="q-text">Q' + questionNum + '. ' + esc(qLoc.q) + '</div>' +
+    (helper ? '<div class="q-helper"><span class="q-helper-icon">ℹ</span><span>' + esc(helper) + '</span></div>' : '') +
+    '<div class="q-options">' + optsHtml + '</div>' +
+    '<div class="replay-row">' +
+    '  <button class="replay-pill replay-btn ' + (state.soundOn ? 'active' : 'inactive') + '" id="listen-btn" type="button">🔊 ' + esc(state.soundOn ? L.audio_listen_now : L.tap_to_hear) + '</button>' +
+    '  <button class="replay-pill replay-btn ' + (state.soundOn ? 'active' : 'inactive') + '" id="replay-btn-q" type="button">↺ ' + esc(L.replay_question) + '</button>' +
+    '</div>' +
+    '<div class="early-stop-note">' +
+    '  <span>💡</span><span>' + esc(L.early_stop_note) + '</span>' +
+    '</div>';
+
+  panel.querySelectorAll(".q-opt").forEach(b => {
+    b.addEventListener("click", () => onAnswer(next.key, schemaItem.options[parseInt(b.dataset.i,10)].code));
+  });
+  // Pass 2 wiring: Listen and Replay both read the current question text.
+  // No-op when sound is off (Audio.readQuestion returns false silently).
+  const onReplay = () => {
+    if (state.soundOn) Audio.readQuestion(qLoc.q, state.lang);
+  };
+  const listenEl = panel.querySelector("#listen-btn");
+  const replayEl = panel.querySelector("#replay-btn-q");
+  if (listenEl) listenEl.addEventListener("click", onReplay);
+  if (replayEl) replayEl.addEventListener("click", onReplay);
+
+  // Auto-read the question once on render when sound is on. The small delay
+  // lets the visual update register first.
+  if (state.soundOn) {
+    setTimeout(() => Audio.readQuestion(qLoc.q, state.lang), 200);
+  }
+}
+
+function outcomeShortKey(outcome) {
+  if (outcome === Triage.EMERGENCY) return "emergency";
+  if (outcome === Triage.ACT_NOW) return "act_now";
+  return "keep_mon";
+}
+
+function renderResultHtml(L) {
+  const r = state.decision;
+  const okey = outcomeShortKey(r.outcome);
+  const titleClass = okey === "emergency" ? "emergency" : okey === "act_now" ? "act-now" : "keep-mon";
+  const icon = okey === "emergency" ? "⚠" : okey === "act_now" ? "⚠" : "✓";
+  const title = L["result_title_" + okey];
+  const subtitle = L["result_subtitle_" + okey];
+  const msg = L["result_msg_" + okey];
+  const askedCount = state.questionsAsked.length;
+  const decisionLine = L.decision_reached.replace("{n}", askedCount);
+
+  return '' +
+    '<div class="stage-badge result">' + esc(L.badge_result) + '</div>' +
+    '<div class="result-card">' +
+    '  <div class="result-card-header ' + titleClass + '">' +
+    '    <div class="result-icon">' + icon + '</div>' +
+    '    <div>' +
+    '      <div class="result-title">' + esc(title) + '</div>' +
+    '      <div class="result-subtitle">' + esc(subtitle) + '</div>' +
+    '    </div>' +
+    '  </div>' +
+    '  <div class="result-body">' +
+    '    <div class="result-message">' + esc(msg) + '</div>' +
+    '    <div class="result-stat">' +
+    '      <span class="result-stat-label">' + esc(decisionLine) + '</span>' +
+    '    </div>' +
+    '    <div class="result-stat">' +
+    '      <span class="result-stat-label">' + esc(L.early_stopping_reason_label) + '</span>' +
+    '      <span class="result-stat-value">' + esc(r.reason_code) + '</span>' +
+    '    </div>' +
+    '    <div class="result-stat">' +
+    '      <span class="result-stat-label">' + esc(L.questions_answered) + '</span>' +
+    '      <span class="result-stat-value">' + askedCount + " / 14" + '</span>' +
+    '    </div>' +
+    '    <div class="result-disclaimer">' + esc(L.legend_disclaimer) + '</div>' +
+    '  </div>' +
+    '</div>';
+}
+
+function renderRightPanel() {
+  const L = t();
+  document.getElementById("panel-right-title").textContent = L.panel_right_title;
+  document.getElementById("legend-title").textContent = L.legend_title;
+  document.getElementById("legend-emergency-title").textContent = L.legend_emergency_title;
+  document.getElementById("legend-emergency-desc").textContent = L.legend_emergency_desc;
+  document.getElementById("legend-act-title").textContent = L.legend_act_title;
+  document.getElementById("legend-act-desc").textContent = L.legend_act_desc;
+  document.getElementById("legend-keep-title").textContent = L.legend_keep_title;
+  document.getElementById("legend-keep-desc").textContent = L.legend_keep_desc;
+  document.getElementById("legend-disclaimer").textContent = L.legend_disclaimer;
+
+  const bp = document.getElementById("backend-preview");
+  const langValue = state.lang === "en" ? "English" : "Yorùbá";
+
+  let html = '<div class="bp-section">' +
+    '  <div class="bp-section-title">' + esc(L.session_summary) + '</div>' +
+    '  <div class="bp-row"><span class="bp-row-label">✓ ' + esc(L.consent_given) + '</span><span class="bp-row-value true">true</span></div>' +
+    '  <div class="bp-row"><span class="bp-row-label">🌐 ' + esc(L.language_label) + '</span><span class="bp-row-value">' + esc(langValue) + '</span></div>' +
+    '  <div class="bp-row"><span class="bp-row-label">📞 ' + esc(L.raw_phone_stored) + '</span><span class="bp-row-value false">false</span></div>' +
+    '  <div class="bp-row"><span class="bp-row-label">📍 ' + esc(L.geography_level) + '</span><span class="bp-row-value">' + esc(L.geography_value) + '</span></div>' +
+    '  <div class="bp-row"><span class="bp-row-label">🆔 ' + esc(L.session_id) + '</span><span class="bp-row-value">' + esc(state.sessionId) + '</span></div>' +
+    '</div>';
+
+  html += '<div class="bp-section">' +
+    '  <div class="bp-section-title">' + esc(L.answers_so_far) + '</div>';
+  if (state.questionsAsked.length === 0) {
+    html += '<div style="font-size:0.78rem; color: var(--muted); font-style: italic;">' + esc(L.collecting_info) + '</div>';
+  } else {
+    state.questionsAsked.forEach((qKey, idx) => {
+      const ansCode = state.answers[qKey];
+      const display = typeof ansCode === "boolean" ? String(ansCode) : '"' + ansCode + '"';
+      html += '<div class="bp-answer-row"><span class="bp-answer-q">Q' + (idx+1) + '</span><span>' + esc(qKey) + '</span><span class="bp-answer-eq">=</span><span>' + esc(display) + '</span></div>';
+    });
+  }
+  html += '</div>';
+
+  const askedCount = state.questionsAsked.length;
+  let stageLabel, earlyStop, currentAssessment, currentAssessmentClass, rationale;
+  if (state.finished && state.decision) {
+    const okey = outcomeShortKey(state.decision.outcome);
+    stageLabel = L.stage_result;
+    earlyStop = L.early_triggered;
+    currentAssessment = L["decided_" + okey];
+    currentAssessmentClass = "";
+    rationale = state.decision.reason_code;
+  } else {
+    const next = pickNextQuestion(state.answers);
+    stageLabel = (next && next.stage === "emergency") ? L.stage_emergency : L.stage_supporting;
+    earlyStop = L.early_not_triggered;
+    currentAssessment = L.collecting_info;
+    currentAssessmentClass = "blue";
+    rationale = "—";
+  }
+  html += '<div class="bp-section">' +
+    '  <div class="bp-section-title">' + esc(L.triage_engine_status) + '</div>' +
+    '  <div class="bp-row"><span class="bp-row-label">' + esc(L.stage_label) + '</span><span class="bp-row-value">' + esc(stageLabel) + '</span></div>' +
+    '  <div class="bp-row"><span class="bp-row-label">' + esc(L.early_stopping) + '</span><span class="bp-row-value">' + esc(earlyStop) + '</span></div>' +
+    '  <div class="bp-row"><span class="bp-row-label">' + esc(L.questions_answered) + '</span><span class="bp-row-value">' + askedCount + ' / 14</span></div>' +
+    '  <div class="bp-row"><span class="bp-row-label">' + esc(L.rationale) + '</span><span class="bp-row-value">' + esc(rationale) + '</span></div>' +
+    '  <div class="bp-row"><span class="bp-row-label">' + esc(L.current_assessment) + '</span><span class="bp-row-value ' + currentAssessmentClass + '">' + esc(currentAssessment) + '</span></div>' +
+    '</div>';
+
+  const log = buildEventLogObject();
+  html += '<div class="bp-section">' +
+    '  <div class="bp-section-title">' + esc(L.event_log_preview) + '</div>' +
+    '  <div class="event-log-code">' + formatEventLog(log) + '</div>' +
+    '</div>';
+
+  bp.innerHTML = html;
+}
+
+function buildEventLogObject() {
+  return {
+    session_id: state.sessionId,
+    timestamp: state.consentTimeISO,
+    language_selected: state.lang,
+    consent: true,
+    raw_phone_stored: false,
+    geography_level: "LGA",
+    questions_answered_count: state.questionsAsked.length,
+    questions_not_asked_due_to_early_stopping: SCHEMA.map(s => s.key).filter(k => !(k in state.answers)),
+    triage_outcome: state.decision ? outcomeShortKey(state.decision.outcome) : null,
+    triage_rationale_code: state.decision ? state.decision.reason_code : null,
+    early_stopping_reason: state.decision ? state.decision.reason_code : null,
+    engine_version: ENGINE_VERSION,
+    schema_version: SCHEMA_VERSION
+  };
+}
+
+function formatEventLog(log) {
+  function val(v) {
+    if (v === null) return '<span class="b">null</span>';
+    if (typeof v === "boolean") return '<span class="b">' + v + '</span>';
+    if (typeof v === "number") return '<span class="n">' + v + '</span>';
+    if (Array.isArray(v)) {
+      if (v.length === 0) return '[]';
+      return '[' + v.map(x => '<span class="s">"' + esc(x) + '"</span>').join(", ") + ']';
+    }
+    return '<span class="s">"' + esc(String(v)) + '"</span>';
+  }
+  const keys = Object.keys(log);
+  const lines = keys.map((k, i) => {
+    const isLast = i === keys.length - 1;
+    return '  <span class="k">"' + k + '"</span>: ' + val(log[k]) + (isLast ? "" : ",");
+  });
+  return "{\n" + lines.join("\n") + "\n}";
+}
+
+// ----- Controller wiring -----
+
+function onAnswer(key, code) {
+  state.answers[key] = code;
+  state.questionsAsked.push(key);
+  state.decision = evaluatePartial(state.answers);
+  if (state.decision) state.finished = true;
+  render();
+}
+
+function runDemo(key) {
+  resetState();
+  const target = DEMO_SCENARIOS[key];
+  let safety = 30;
+  while (!state.decision && safety-- > 0) {
+    const next = pickNextQuestion(state.answers);
+    if (!next) break;
+    if (!(next.key in target)) break;
+    state.answers[next.key] = target[next.key];
+    state.questionsAsked.push(next.key);
+    state.decision = evaluatePartial(state.answers);
+    if (state.decision) state.finished = true;
+  }
+  render();
+}
+
+function resetState() {
+  state.answers = {};
+  state.decision = null;
+  state.questionsAsked = [];
+  state.sessionId = "DEMO-" + Math.random().toString(36).slice(2, 7).toUpperCase();
+  state.consentTimeISO = new Date().toISOString();
+  state.finished = false;
+}
+
+function setLang(lang) {
+  state.lang = lang;
+  render();
+}
+
+// ----- Boot (browser only) -----
+
+if (typeof document !== "undefined") {
+  document.getElementById("lang-en-btn").addEventListener("click", () => setLang("en"));
+  document.getElementById("lang-yo-btn").addEventListener("click", () => setLang("yo"));
+  document.getElementById("demo-emergency-btn").addEventListener("click", () => runDemo("emergency"));
+  document.getElementById("demo-act-now-btn").addEventListener("click", () => runDemo("act_now"));
+  document.getElementById("demo-keep-mon-btn").addEventListener("click", () => runDemo("keep_monitoring"));
+  document.getElementById("restart-btn").addEventListener("click", () => { resetState(); render(); });
+  // Pass 2: Sound On/Off toggle. The Audio module handles its own internal
+  // state too; we keep state.soundOn in sync so the renderer can update icons.
+  document.getElementById("sound-toggle").addEventListener("click", () => {
+    state.soundOn = !state.soundOn;
+    Audio.setSoundOn(state.soundOn);
+    if (!state.soundOn) Audio.stopAllAudio();
+    render();
+  });
+  // Re-render the Yoruba-voice banner whenever the browser finishes loading
+  // voices (this often arrives asynchronously after page load).
+  window.__onVoicesChanged = () => { if (state.lang === "yo") render(); };
+  render();
+}
+
+
+</script>
+</body>
+</html>
